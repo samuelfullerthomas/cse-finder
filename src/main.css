@@ -1,0 +1,37 @@
+h3 {
+  border-bottom: 1px solid gray;
+  padding: 5px 10px 5px;
+  margin: 10px;
+}
+
+.Loader {
+  width: 256px;
+  height: 256px;
+  background-image: url('https://d1m54pdnjzjnhe.cloudfront.net/thomascookairlines/t012/ajax-loader.gif');
+  background-size: contain;
+}
+
+.Row {
+  display: flex;
+  width: 100%;
+}
+
+.List {
+  background-color: rgba(71, 178, 141, 0.7);
+  padding: 5px 20px;
+  margin: 0 1px;
+  box-sizing: border-box;
+  width: 25%;
+}
+
+.List.isFull {
+  background-color: rgba(255, 0, 0, 0.7);
+}
+
+.Task {
+  height: 20px;
+  line-height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

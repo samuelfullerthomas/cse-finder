@@ -1,0 +1,25 @@
+{
+  "name": "cse-finder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/cse-finder.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KwanMan/cse-finder.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KwanMan/cse-finder/issues"
+  },
+  "homepage": "https://github.com/KwanMan/cse-finder#readme",
+  "dependencies": {
+    "css-loader": "^0.23.1",
+    "slapdash": "^0.4.0",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.13.0"
+  }
+}
