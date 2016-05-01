@@ -1,9 +1,4 @@
 # cse-finder
 
-Create `src/lib/credentials.js`
-
-```js
-module.exports = {
-  auth: 'asana_personal_access_token'
-}
-```
+To get your very own Personal Access Token, go to:
+My Profile Settings > Apps > Manage Developer Apps > Create New Personal Access Token
