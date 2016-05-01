@@ -12,7 +12,7 @@ function buildUI (sections, cses) {
 
   htmlSections.push(buildHeaders(cses))
 
-  while (htmlSections.length < 6 || !foundFree) {
+  while (htmlSections.length < 10 || !foundFree) {
     section = sections[dateToKey(currentDate)] || {}
     title = dateToTitle(currentDate)
 
