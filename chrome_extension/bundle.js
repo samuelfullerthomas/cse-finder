@@ -678,7 +678,6 @@
 	  htmlSections.push(buildHeaders(cses))
 
 	  while (htmlSections.length < 6 || !foundFree) {
-	    currentDate = getNextDay(currentDate)
 	    section = sections[dateToKey(currentDate)] || {}
 	    title = dateToTitle(currentDate)
 
@@ -686,20 +685,38 @@
 	    if (objectSome(section, function (k) { return k.status === 'free' })) {
 	      foundFree = true
 	    }
+	    currentDate = getNextDay(currentDate)
 	  }
 
 	  return htmlSections.join('')
 	}
 
 	function getNextDay (base) {
-	  var bankHolidays = [
-	    [5 - 1, 2]
-	  ]
 	  var next = new Date(base.getTime())
 	  do {
 	    next.setUTCDate(next.getUTCDate() + 1)
-	  } while (next.getUTCDay() === 0 || next.getUTCDay() === 6 || bankHolidays.some(function (b) { return next.getUTCDate() === b[1] && next.getUTCMonth() === b[0]}))
+	  } while (!workingDay(next))
 	  return next
+	}
+
+	function workingDay (date) {
+	  var day = date.getUTCDay()
+	  if (day === 0 || day === 6) {
+	    return false
+	  }
+	  if (isBankHoliday(date)) {
+	    return false
+	  }
+	  return true
+	}
+
+	function isBankHoliday (date) {
+	  var bankHolidays = [
+	    [5 - 1, 2]
+	  ]
+	  return bankHolidays.some(function (b) {
+	    return date.getUTCDate() === b[1] && date.getUTCMonth() === b[0]
+	  })
 	}
 
 	function dateToKey (date) {
