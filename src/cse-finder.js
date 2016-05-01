@@ -19,15 +19,11 @@ window.chrome.storage.local.get({'auth': false}, function (items) {
       window.chrome.runtime.openOptionsPage()
     })
     el.innerHTML = 'Click here to set your auth code!'
-    var poll = function () {
-      if (document.body) {
-        document.body.innerHTML = ''
-        document.body.appendChild(el)
-      } else {
-        setTimeout(poll, 50)
-      }
-    }
-    poll()
+    el.style.width = '200px'
+    el.style.textAlign = 'center'
+    el.style.marginTop = '40px'
+    document.body.innerHTML = ''
+    document.body.appendChild(el)
   } else {
     Promise
       .all(cses.map(function (cse) {
