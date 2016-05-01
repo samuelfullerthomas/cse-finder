@@ -47,7 +47,11 @@ function workingDay (date) {
 
 function isBankHoliday (date) {
   var bankHolidays = [
-    [5 - 1, 2]
+    [5 - 1, 2],
+    [5 - 1, 30],
+    [8 - 1, 29],
+    [12 - 1, 26],
+    [12 - 1, 27]
   ]
   return bankHolidays.some(function (b) {
     return date.getUTCDate() === b[1] && date.getUTCMonth() === b[0]
