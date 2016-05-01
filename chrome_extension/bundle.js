@@ -47,9 +47,9 @@
 	__webpack_require__(1)
 
 	var getCseQueue = __webpack_require__(5)
-	var parseSections = __webpack_require__(9)
-	var mapBySection = __webpack_require__(14)
-	var buildUI = __webpack_require__(15)
+	var parseSections = __webpack_require__(8)
+	var mapBySection = __webpack_require__(13)
+	var buildUI = __webpack_require__(14)
 
 	var cses = [
 	  { name: 'Tommy', id: '41755044194088' },
@@ -58,20 +58,41 @@
 	  { name: 'David', id: '19208422049726' }
 	]
 
-	Promise
-	  .all(cses.map(getCseQueue))
-	  .then(function (cses) {
-	    cses.unshift({})
-	    return Object.assign.apply(Object, cses)
-	  })
-	  .then(parseSections)
-	  .then(mapBySection)
-	  .then(function (sections) {
-	    return buildUI(sections, cses.map(function (c) { return c.name }))
-	  })
-	  .then(function (html) {
-	    document.body.innerHTML = html
-	  })
+	window.chrome.storage.local.get({'auth': false}, function (items) {
+	  if (!items.auth) {
+	    var el = document.createElement('div')
+	    el.addEventListener('click', function () {
+	      window.chrome.runtime.openOptionsPage()
+	    })
+	    el.innerHTML = 'Click here to set your auth code!'
+	    var poll = function () {
+	      if (document.body) {
+	        document.body.innerHTML = ''
+	        document.body.appendChild(el)
+	      } else {
+	        setTimeout(poll, 50)
+	      }
+	    }
+	    poll()
+	  } else {
+	    Promise
+	      .all(cses.map(function (cse) {
+	        return getCseQueue(cse, items.auth)
+	      }))
+	      .then(function (cses) {
+	        cses.unshift({})
+	        return Object.assign.apply(Object, cses)
+	      })
+	      .then(parseSections)
+	      .then(mapBySection)
+	      .then(function (sections) {
+	        return buildUI(sections, cses.map(function (c) { return c.name }))
+	      })
+	      .then(function (html) {
+	        document.body.innerHTML = html
+	      })
+	  }
+	})
 
 
 /***/ },
@@ -428,10 +449,10 @@
 
 	var request = __webpack_require__(6)
 
-	function getCseQueue (cse) {
+	function getCseQueue (cse, auth) {
 	  return new Promise(function (resolve) {
 	    var path = 'tasks?workspace=896401739841&completed_since=now&assignee=' + cse.id
-	    return request(path, 'GET', function (json) {
+	    return request(path, auth, 'GET', function (json) {
 	      var tasks = json.data
 
 	      var queue = { 'new': [] }
@@ -459,15 +480,14 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var config = __webpack_require__(7)
-	var credentials = __webpack_require__(8)
 
-	module.exports = function request (url, type, cb) {
+	module.exports = function request (url, auth, type, cb) {
 	  return new Promise(function (resolve) {
 	    var xhr = new window.XMLHttpRequest()
 	    xhr.onload = function () { cb(xhr.response) }
 	    xhr.onerror = function (e) { throw e }
 	    xhr.open(type, config.endpoint + url)
-	    xhr.setRequestHeader('Authorization', 'Bearer ' + credentials.auth)
+	    xhr.setRequestHeader('Authorization', 'Bearer ' + auth)
 	    xhr.responseType = 'json'
 	    xhr.send()
 	  })
@@ -485,18 +505,9 @@
 
 /***/ },
 /* 8 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  auth: '0/3b2e47b9ac6806f01442d0978547c9ea'
-	}
-
-
-/***/ },
-/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var objectMap = __webpack_require__(10)
+	var objectMap = __webpack_require__(9)
 
 	function parseSections (cses) {
 	  return objectMap(cses, function (sections, cse) {
@@ -540,11 +551,11 @@
 
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var map = __webpack_require__(11)
-	var keys = __webpack_require__(13)
+	var map = __webpack_require__(10)
+	var keys = __webpack_require__(12)
 
 	module.exports = function objectMap (object, callback, context) {
 	  var result = {}
@@ -564,10 +575,10 @@
 
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isNative = __webpack_require__(12)
+	var isNative = __webpack_require__(11)
 	var map = Array.prototype.map
 	module.exports = isNative(map)
 	  ? function nativeMap (array, callback, context) {
@@ -584,7 +595,7 @@
 
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports) {
 
 	// Checks to see whether a specified method is a browser native
@@ -618,10 +629,10 @@
 
 
 /***/ },
-/* 13 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isNative = __webpack_require__(12)
+	var isNative = __webpack_require__(11)
 	var keys = Object.keys
 	module.exports = isNative(keys)
 	  ? keys
@@ -635,7 +646,7 @@
 
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports) {
 
 	function mapBySection (cses) {
@@ -653,11 +664,11 @@
 
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var buildSection = __webpack_require__(16)
-	var ordinalise = __webpack_require__(18)
+	var buildSection = __webpack_require__(15)
+	var ordinalise = __webpack_require__(17)
 
 	function buildUI (sections, cses) {
 	  var currentDate = new Date()
@@ -712,10 +723,10 @@
 
 
 /***/ },
-/* 16 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var capitalise = __webpack_require__(17)
+	var capitalise = __webpack_require__(16)
 
 	function buildSection (section, title, cses) {
 	  var html = ''
@@ -740,7 +751,7 @@
 
 
 /***/ },
-/* 17 */
+/* 16 */
 /***/ function(module, exports) {
 
 	function capitalise (str, allWords) {
@@ -759,7 +770,7 @@
 
 
 /***/ },
-/* 18 */
+/* 17 */
 /***/ function(module, exports) {
 
 	function ordinalise (i) {

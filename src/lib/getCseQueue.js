@@ -1,9 +1,9 @@
 var request = require('./request')
 
-function getCseQueue (cse) {
+function getCseQueue (cse, auth) {
   return new Promise(function (resolve) {
     var path = 'tasks?workspace=896401739841&completed_since=now&assignee=' + cse.id
-    return request(path, 'GET', function (json) {
+    return request(path, auth, 'GET', function (json) {
       var tasks = json.data
 
       var queue = { 'new': [] }

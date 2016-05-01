@@ -12,17 +12,38 @@ var cses = [
   { name: 'David', id: '19208422049726' }
 ]
 
-Promise
-  .all(cses.map(getCseQueue))
-  .then(function (cses) {
-    cses.unshift({})
-    return Object.assign.apply(Object, cses)
-  })
-  .then(parseSections)
-  .then(mapBySection)
-  .then(function (sections) {
-    return buildUI(sections, cses.map(function (c) { return c.name }))
-  })
-  .then(function (html) {
-    document.body.innerHTML = html
-  })
+window.chrome.storage.local.get({'auth': false}, function (items) {
+  if (!items.auth) {
+    var el = document.createElement('div')
+    el.addEventListener('click', function () {
+      window.chrome.runtime.openOptionsPage()
+    })
+    el.innerHTML = 'Click here to set your auth code!'
+    var poll = function () {
+      if (document.body) {
+        document.body.innerHTML = ''
+        document.body.appendChild(el)
+      } else {
+        setTimeout(poll, 50)
+      }
+    }
+    poll()
+  } else {
+    Promise
+      .all(cses.map(function (cse) {
+        return getCseQueue(cse, items.auth)
+      }))
+      .then(function (cses) {
+        cses.unshift({})
+        return Object.assign.apply(Object, cses)
+      })
+      .then(parseSections)
+      .then(mapBySection)
+      .then(function (sections) {
+        return buildUI(sections, cses.map(function (c) { return c.name }))
+      })
+      .then(function (html) {
+        document.body.innerHTML = html
+      })
+  }
+})
