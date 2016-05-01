@@ -50,15 +50,9 @@
 	var parseSections = __webpack_require__(8)
 	var mapBySection = __webpack_require__(13)
 	var buildUI = __webpack_require__(14)
-	var age = __webpack_require__(19)
-	var now = __webpack_require__(20)
-
-	var cses = [
-	  { name: 'Tommy', id: '41755044194088' },
-	  { name: 'Jimmy', id: '76629447954998' },
-	  { name: 'Stefi', id: '45131341129610' },
-	  { name: 'David', id: '19208422049726' }
-	]
+	var age = __webpack_require__(20)
+	var now = __webpack_require__(21)
+	var config = __webpack_require__(7)
 
 	var dataTime
 
@@ -72,7 +66,7 @@
 	      authError()
 	    } else {
 	      (function () {
-	        if (!force && items.cache && age(items.cache.time) <= 5) {
+	        if (!force && items.cache && age(items.cache.time) < 5) {
 	          dataTime = items.cache.time
 	          return new Promise(function (r) {
 	            console.log('using cache')
@@ -80,7 +74,7 @@
 	          })
 	        }
 	        return Promise
-	          .all(cses.map(function (cse) {
+	          .all(config.cses.map(function (cse) {
 	            return getCseQueue(cse, items.auth)
 	          }))
 	          .then(function (data) {
@@ -102,7 +96,7 @@
 	        .then(parseSections)
 	        .then(mapBySection)
 	        .then(function (sections) {
-	          return buildUI(sections, cses.map(function (c) { return c.name }))
+	          return buildUI(sections, config.cses.map(function (c) { return c.name }))
 	        })
 	        .then(function (html) {
 	          var refreshWrapper = document.createElement('div')
@@ -179,7 +173,7 @@
 
 
 	// module
-	exports.push([module.id, "h3 {\n  border-bottom: 1px solid gray;\n  padding: 5px 10px 5px;\n  margin: 10px;\n  color: gray;\n}\n\n.Loader {\n  width: 256px;\n  height: 256px;\n  background-image: url('https://d1m54pdnjzjnhe.cloudfront.net/thomascookairlines/t012/ajax-loader.gif');\n  background-size: contain;\n}\n\n.Row {\n  display: flex;\n  width: 100%;\n}\n\n.List {\n  background-color: rgba(71, 178, 141, 0.7);\n  padding: 5px 20px;\n  margin: 0 1px;\n  box-sizing: border-box;\n  width: 25%;\n}\n\n.List.isFull {\n  background-color: rgba(255, 0, 0, 0.7);\n}\n\n.Task {\n  height: 20px;\n  line-height: 20px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.List-header {\n  background-color: white;\n  text-align: center;\n  font-weight: bold;\n  font-size: 19px;\n}", ""]);
+	exports.push([module.id, "h3 {\n  border-bottom: 1px solid gray;\n  padding: 5px 10px 5px;\n  margin: 10px;\n  color: gray;\n}\n\n.Loader {\n  width: 256px;\n  height: 256px;\n  background-image: url('https://d1m54pdnjzjnhe.cloudfront.net/thomascookairlines/t012/ajax-loader.gif');\n  background-size: contain;\n}\n\n.Row {\n  display: flex;\n  width: 100%;\n}\n\n.List {\n  background-color: rgba(71, 178, 141, 0.7);\n  padding: 5px 20px;\n  margin: 0 1px;\n  box-sizing: border-box;\n  width: 25%;\n  min-height: 30px;\n}\n\n.List.isFull {\n  background-color: rgba(255, 0, 0, 0.7);\n}\n\n.Task {\n  height: 20px;\n  line-height: 20px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.List-header {\n  background-color: white;\n  text-align: center;\n  font-weight: bold;\n  font-size: 19px;\n}", ""]);
 
 	// exports
 
@@ -548,7 +542,13 @@
 /***/ function(module, exports) {
 
 	module.exports = {
-	  endpoint: 'https://app.asana.com/api/1.0/'
+	  endpoint: 'https://app.asana.com/api/1.0/',
+	  cses: [
+	    { name: 'Tommy', id: '41755044194088' },
+	    { name: 'Jimmy', id: '76629447954998' },
+	    { name: 'Stefi', id: '45131341129610' },
+	    { name: 'David', id: '19208422049726' }
+	  ]
 	}
 
 
@@ -717,8 +717,8 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var buildSection = __webpack_require__(15)
-	var buildHeaders = __webpack_require__(17)
-	var ordinalise = __webpack_require__(18)
+	var buildHeaders = __webpack_require__(18)
+	var ordinalise = __webpack_require__(19)
 
 	function buildUI (sections, cses) {
 	  var currentDate = new Date()
@@ -800,24 +800,41 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var capitalise = __webpack_require__(16)
+	var classnames = __webpack_require__(17)
 
 	function buildSection (section, title, cses) {
 	  var html = ''
 	  html += '<h3>' + capitalise(title) + '</h3>'
 	  html += '<div class="Row">'
 	  html += cses.map(function (cse) {
-	    if (!section[cse]) {
-	      return '<div class="List"></div>'
+	    if (section[cse]) {
+	      return buildList(section[cse])
 	    }
-	    var tasks = section[cse].tasks
-	    var isFull = section[cse].status === 'full' || section[cse].status === 'ooo'
-	    var html = '<div class="List' + (isFull ? ' isFull' : '') + '">'
-	    html += tasks.map(function (t) { return '<div class="Task">' + t + '</div>' }).join('')
-	    html += '</div>'
-	    return html
+	    return buildList({
+	      status: 'free',
+	      tasks: []
+	    })
 	  }).join('')
 	  html += '</div>'
 	  return html
+	}
+
+	function buildList (list) {
+	  var className = classnames({
+	    List: true,
+	    isFull: list.status === 'full' || list.status === 'ooo'
+	  })
+
+	  var html = ''
+	  html += '<div class="' + className + '">'
+	  html += list.tasks.map(buildTask).join('')
+	  html += '</div>'
+
+	  return html
+	}
+
+	function buildTask (name) {
+	  return '<div class="Task">' + name + '</div>'
 	}
 
 	module.exports = buildSection
@@ -844,6 +861,23 @@
 
 /***/ },
 /* 17 */
+/***/ function(module, exports) {
+
+	function classnames (classes) {
+	  var output = []
+	  Object.keys(classes).forEach(function (classname) {
+	    if (classes[classname]) {
+	      output.push(classname)
+	    }
+	  })
+	  return output.join(' ')
+	}
+
+	module.exports = classnames
+
+
+/***/ },
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var capitalise = __webpack_require__(16)
@@ -862,7 +896,7 @@
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports) {
 
 	function ordinalise (i) {
@@ -884,7 +918,7 @@
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 	function age (time) {
@@ -897,7 +931,7 @@
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports) {
 
 	function now () {

@@ -4,15 +4,9 @@ var getCseQueue = require('./lib/getCseQueue')
 var parseSections = require('./lib/parseSections')
 var mapBySection = require('./lib/mapBySection')
 var buildUI = require('./lib/buildUI')
-var age = require('./lib/age')
-var now = require('./lib/now')
-
-var cses = [
-  { name: 'Tommy', id: '41755044194088' },
-  { name: 'Jimmy', id: '76629447954998' },
-  { name: 'Stefi', id: '45131341129610' },
-  { name: 'David', id: '19208422049726' }
-]
+var age = require('./util/age')
+var now = require('./util/now')
+var config = require('./config')
 
 var dataTime
 
@@ -26,7 +20,7 @@ var run = function (force) {
       authError()
     } else {
       (function () {
-        if (!force && items.cache && age(items.cache.time) <= 5) {
+        if (!force && items.cache && age(items.cache.time) < 5) {
           dataTime = items.cache.time
           return new Promise(function (r) {
             console.log('using cache')
@@ -34,7 +28,7 @@ var run = function (force) {
           })
         }
         return Promise
-          .all(cses.map(function (cse) {
+          .all(config.cses.map(function (cse) {
             return getCseQueue(cse, items.auth)
           }))
           .then(function (data) {
@@ -56,7 +50,7 @@ var run = function (force) {
         .then(parseSections)
         .then(mapBySection)
         .then(function (sections) {
-          return buildUI(sections, cses.map(function (c) { return c.name }))
+          return buildUI(sections, config.cses.map(function (c) { return c.name }))
         })
         .then(function (html) {
           var refreshWrapper = document.createElement('div')

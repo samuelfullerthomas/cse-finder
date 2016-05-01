@@ -1,4 +1,4 @@
-var config = require('./config')
+var config = require('../config')
 
 module.exports = function request (url, auth, type, cb) {
   return new Promise(function (resolve) {

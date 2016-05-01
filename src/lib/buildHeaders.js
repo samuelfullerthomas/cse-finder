@@ -1,4 +1,4 @@
-var capitalise = require('./capitalise')
+var capitalise = require('../util/capitalise')
 
 function buildHeaders (cses) {
   var html = ''

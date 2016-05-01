@@ -1,6 +1,6 @@
 var buildSection = require('./buildSection')
 var buildHeaders = require('./buildHeaders')
-var ordinalise = require('./ordinalise')
+var ordinalise = require('../util/ordinalise')
 
 function buildUI (sections, cses) {
   var currentDate = new Date()
