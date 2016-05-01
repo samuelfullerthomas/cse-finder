@@ -2,6 +2,7 @@ h3 {
   border-bottom: 1px solid gray;
   padding: 5px 10px 5px;
   margin: 10px;
+  color: gray;
 }
 
 .Loader {
@@ -34,4 +35,11 @@ h3 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.List-header {
+  background-color: white;
+  text-align: center;
+  font-weight: bold;
+  font-size: 19px;
 }

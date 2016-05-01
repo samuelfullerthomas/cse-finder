@@ -1,4 +1,5 @@
 var buildSection = require('./buildSection')
+var buildHeaders = require('./buildHeaders')
 var ordinalise = require('./ordinalise')
 
 function buildUI (sections, cses) {
@@ -9,7 +10,9 @@ function buildUI (sections, cses) {
 
   var htmlSections = []
 
-  while (htmlSections.length < 5 || !foundFree) {
+  htmlSections.push(buildHeaders(cses))
+
+  while (htmlSections.length < 6 || !foundFree) {
     currentDate = getNextDay(currentDate)
     section = sections[dateToKey(currentDate)] || {}
     title = dateToTitle(currentDate)

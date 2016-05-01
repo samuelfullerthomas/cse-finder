@@ -126,7 +126,7 @@
 
 
 	// module
-	exports.push([module.id, "h3 {\n  border-bottom: 1px solid gray;\n  padding: 5px 10px 5px;\n  margin: 10px;\n}\n\n.Loader {\n  width: 256px;\n  height: 256px;\n  background-image: url('https://d1m54pdnjzjnhe.cloudfront.net/thomascookairlines/t012/ajax-loader.gif');\n  background-size: contain;\n}\n\n.Row {\n  display: flex;\n  width: 100%;\n}\n\n.List {\n  background-color: rgba(71, 178, 141, 0.7);\n  padding: 5px 20px;\n  margin: 0 1px;\n  box-sizing: border-box;\n  width: 25%;\n}\n\n.List.isFull {\n  background-color: rgba(255, 0, 0, 0.7);\n}\n\n.Task {\n  height: 20px;\n  line-height: 20px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}", ""]);
+	exports.push([module.id, "h3 {\n  border-bottom: 1px solid gray;\n  padding: 5px 10px 5px;\n  margin: 10px;\n  color: gray;\n}\n\n.Loader {\n  width: 256px;\n  height: 256px;\n  background-image: url('https://d1m54pdnjzjnhe.cloudfront.net/thomascookairlines/t012/ajax-loader.gif');\n  background-size: contain;\n}\n\n.Row {\n  display: flex;\n  width: 100%;\n}\n\n.List {\n  background-color: rgba(71, 178, 141, 0.7);\n  padding: 5px 20px;\n  margin: 0 1px;\n  box-sizing: border-box;\n  width: 25%;\n}\n\n.List.isFull {\n  background-color: rgba(255, 0, 0, 0.7);\n}\n\n.Task {\n  height: 20px;\n  line-height: 20px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.List-header {\n  background-color: white;\n  text-align: center;\n  font-weight: bold;\n  font-size: 19px;\n}", ""]);
 
 	// exports
 
@@ -664,7 +664,8 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var buildSection = __webpack_require__(15)
-	var ordinalise = __webpack_require__(17)
+	var buildHeaders = __webpack_require__(17)
+	var ordinalise = __webpack_require__(18)
 
 	function buildUI (sections, cses) {
 	  var currentDate = new Date()
@@ -674,7 +675,9 @@
 
 	  var htmlSections = []
 
-	  while (htmlSections.length < 5 || !foundFree) {
+	  htmlSections.push(buildHeaders(cses))
+
+	  while (htmlSections.length < 6 || !foundFree) {
 	    currentDate = getNextDay(currentDate)
 	    section = sections[dateToKey(currentDate)] || {}
 	    title = dateToTitle(currentDate)
@@ -767,6 +770,25 @@
 
 /***/ },
 /* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var capitalise = __webpack_require__(16)
+
+	function buildHeaders (cses) {
+	  var html = ''
+	  html += '<div class="Row">'
+	  html += cses.map(function (cse) {
+	    return '<div class="List List-header">' + capitalise(cse) + '</div>'
+	  }).join('')
+	  html += '</div>'
+	  return html
+	}
+
+	module.exports = buildHeaders
+
+
+/***/ },
+/* 18 */
 /***/ function(module, exports) {
 
 	function ordinalise (i) {
