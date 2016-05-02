@@ -18,6 +18,7 @@ var kickoff = async function (force) {
     var html = buildUI(sections, cses.map((c) => c.name))
 
     var refreshWrapper = document.createElement('div')
+    refreshWrapper.classList.add('Refresh')
     refreshWrapper.innerHTML = 'Last updated ' + age(time) + ' minutes ago. <a href="#"> Refresh? </a>'
     refreshWrapper.querySelector('a').addEventListener('click', function (e) {
       e.preventDefault()

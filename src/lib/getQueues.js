@@ -1,14 +1,14 @@
 import getCseQueue from './getCseQueue'
 import parseSections from './parseSections'
 import mapBySection from './mapBySection'
-import { cses } from '../config'
+import { cses, cacheTime } from '../config'
 
 import { age, now, retrieve, save } from './util'
 
 export default async function getQueues (auth, force) {
   var { cache } = await retrieve({ cache: false })
 
-  if (!force && cache && age(cache.time) < 5) {
+  if (!force && cache && age(cache.time) < cacheTime) {
     return cache
   }
 

@@ -1,5 +1,9 @@
 export var endpoint = 'https://app.asana.com/api/1.0/'
 
+export var cacheTime = 5
+
+export var minDays = 7
+
 export var cses = [
   { name: 'Tommy', id: '41755044194088' },
   { name: 'Jimmy', id: '76629447954998' },

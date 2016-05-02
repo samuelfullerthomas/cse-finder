@@ -4,20 +4,11 @@ export default function parseSections (cses) {
   return objectMap(cses, function (sections, cse) {
     var newSections = {}
     Object.keys(sections).forEach(function (oldSectionName) {
-      var newSectionName = matchOtherSections(oldSectionName)
-      if (!newSectionName) {
-        newSectionName = matchDateSection(oldSectionName)
-      }
+      var newSectionName = matchOtherSections(oldSectionName) || matchDateSection(oldSectionName)
       if (newSectionName) {
-        var status = 'free'
-        if (/full/i.test(oldSectionName)) {
-          status = 'full'
-        } else if (/ooo|bank|leave/i.test(oldSectionName)) {
-          status = 'ooo'
-        }
         newSections[newSectionName] = {
           tasks: sections[oldSectionName],
-          status: status
+          full: /ooo|bank|leave|full/i.test(oldSectionName)
         }
       }
     })

@@ -11,9 +11,7 @@ export function capitalise (str, allWords) {
   if (allWords) {
     return str
       .split(' ')
-      .map(function (w) {
-        return capitalise(w, false)
-      })
+      .map(w => capitalise(w, false))
       .join(' ')
   }
   return str[0].toUpperCase() + str.slice(1).toLowerCase()
@@ -53,19 +51,17 @@ export function pollFor (condition) {
       window.setTimeout(() => poll(resolve), 100)
     }
   }
-  return new Promise(function (r) {
-    poll(r)
-  })
+  return new Promise(poll)
+}
+
+export function objectSome (obj, fn) {
+  return Object.keys(obj).some(key => fn(obj[key]))
 }
 
 export function retrieve (obj) {
-  return new Promise(function (r) {
-    window.chrome.storage.local.get(obj, r)
-  })
+  return new Promise(r => window.chrome.storage.local.get(obj, r))
 }
 
 export function save (obj) {
-  return new Promise(function (r) {
-    window.chrome.storage.local.set(obj, r)
-  })
+  return new Promise(r => window.chrome.storage.local.set(obj, r))
 }

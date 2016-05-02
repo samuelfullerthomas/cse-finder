@@ -73,6 +73,7 @@
 	exports.ordinalise = ordinalise;
 	exports.classnames = classnames;
 	exports.pollFor = pollFor;
+	exports.objectSome = objectSome;
 	exports.retrieve = retrieve;
 	exports.save = save;
 	function age(time) {
@@ -129,20 +130,24 @@
 	      }, 100);
 	    }
 	  }
-	  return new Promise(function (r) {
-	    poll(r);
+	  return new Promise(poll);
+	}
+
+	function objectSome(obj, fn) {
+	  return Object.keys(obj).some(function (key) {
+	    return fn(obj[key]);
 	  });
 	}
 
 	function retrieve(obj) {
 	  return new Promise(function (r) {
-	    window.chrome.storage.local.get(obj, r);
+	    return window.chrome.storage.local.get(obj, r);
 	  });
 	}
 
 	function save(obj) {
 	  return new Promise(function (r) {
-	    window.chrome.storage.local.set(obj, r);
+	    return window.chrome.storage.local.set(obj, r);
 	  });
 	}
 
