@@ -1,12 +1,12 @@
 import { age, createElement } from './util'
 
 export default function buildRefresh (time, action) {
-  var html = ''
+  let html = ''
   html += '<div class="Refresh">'
   html += `Last updated ${age(time)} minutes ago. <a href="#"> Refresh? </a>`
   html += '</div>'
-  var $refresh = createElement(html)
-  $refresh.querySelector('a').addEventListener('click', function (e) {
+  const $refresh = createElement(html)
+  $refresh.querySelector('a').addEventListener('click', e => {
     e.preventDefault()
     action()
   })

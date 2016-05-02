@@ -1,6 +1,12 @@
+.AuthError {
+  width: 200px;
+  text-align: center;
+  margin-top: 40px;
+}
+
 .Loader {
-  width: 256px;
-  height: 256px;
+  width: 128px;
+  height: 128px;
   background-image: url('https://d1m54pdnjzjnhe.cloudfront.net/thomascookairlines/t012/ajax-loader.gif');
   background-size: contain;
 }

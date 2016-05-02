@@ -3,20 +3,19 @@ import {
   ordinalise,
   objectSome,
   createElement,
-  classnames
+  classnames,
+  isWorkingDay,
+  openTab
 } from './util'
 import { minDays } from '../config'
 
 export default function buildSections (sections, cses) {
-  var currentDate = new Date()
+  let currentDate = new Date()
   currentDate.setUTCDate(currentDate.getUTCDate() - 1)
 
-  sections = enrichSections(sections, cses)
-
-  var $wrapper = createElement('<div class="Wrapper"></div>')
-
-  sections.forEach(section => {
-    var $section = buildSection(section, cses)
+  const $wrapper = createElement('<div class="Wrapper"></div>')
+  enrichSections(sections, cses).forEach(section => {
+    const $section = buildSection(section, cses)
     $wrapper.appendChild($section)
   })
 
@@ -24,14 +23,14 @@ export default function buildSections (sections, cses) {
 }
 
 function buildSection ({ title, cses }) {
-  var html = ''
+  let html = ''
   html += '<div class="Section">'
   html += `<h3 class="Section-title">${title}</h3>`
   html += '<div class="Section-innerWrapper"></div>'
   html += '</div>'
-  var $section = createElement(html)
+  const $section = createElement(html)
 
-  var $innerWrapper = $section.querySelector('.Section-innerWrapper')
+  const $innerWrapper = $section.querySelector('.Section-innerWrapper')
 
   cses.forEach(cse => {
     const $cse = buildCse(cse)
@@ -41,29 +40,27 @@ function buildSection ({ title, cses }) {
   return $section
 }
 
-function buildCse (cse) {
-  var className = classnames({
+function buildCse ({ full, free, tasks }) {
+  const className = classnames({
     Cse: true,
-    isFull: cse.full,
-    isFree: cse.free
+    isFull: full,
+    isFree: free
   })
 
-  var $cse = createElement(`<div class="${className}"></div>`)
-  cse.tasks.forEach(task => {
+  const $cse = createElement(`<div class="${className}"></div>`)
+  tasks.forEach(task => {
     const $task = createElement(`<div class="Task isClickable">${task.name}</div>`)
-    $task.addEventListener('click', e => {
-      window.chrome.tabs.create({ url: task.url })
-    })
+    $task.addEventListener('click', () => openTab(task.url))
     $cse.appendChild($task)
   })
   return $cse
 }
 
 function enrichSections (sections, cses) {
-  var output = []
-  var foundFree = false
+  const output = []
+  let foundFree = false
 
-  var currentDate = new Date()
+  let currentDate = new Date()
   currentDate.setUTCDate(currentDate.getUTCDate() - 1)
 
   // Get Date sections
@@ -84,69 +81,43 @@ function enrichSections (sections, cses) {
     foundFree = objectSome(newSection.cses, k => k.free) ? true : foundFree
   }
 
+  const emptyBlock = {
+    free: false,
+    full: false,
+    tasks: []
+  }
+
   if (sections.qa) {
-    const qaSection = {
+    output.push({
       title: 'QA',
-      cses: cses.map(cse => {
-        return sections.qa[cse] || {
-          free: false,
-          full: false,
-          tasks: []
-        }
-      })
-    }
-    output.push(qaSection)
+      cses: cses.map(cse => sections.qa[cse] || emptyBlock)
+    })
   }
 
   if (sections.xb) {
-    const xbSection = {
+    output.push({
       title: 'XB',
-      cses: cses.map(cse => {
-        return sections.xb[cse] || {
-          free: false,
-          full: false,
-          tasks: []
-        }
-      })
-    }
-    output.push(xbSection)
+      cses: cses.map(cse => sections.xb[cse] || emptyBlock)
+    })
   }
 
   return output
 }
 
 function getNextDay (base) {
-  var next = new Date(base.getTime())
+  const next = new Date(base.getTime())
   do {
     next.setUTCDate(next.getUTCDate() + 1)
   } while (!isWorkingDay(next))
   return next
 }
 
-function isWorkingDay (date) {
-  var day = date.getUTCDay()
-  return day !== 0 && day !== 6 && !isBankHoliday(date)
-}
-
-function isBankHoliday (date) {
-  var bankHolidays = [
-    [5 - 1, 2],
-    [5 - 1, 30],
-    [8 - 1, 29],
-    [12 - 1, 26],
-    [12 - 1, 27]
-  ]
-  return bankHolidays.some(b => {
-    return date.getUTCDate() === b[1] && date.getUTCMonth() === b[0]
-  })
-}
-
 function dateToKey (date) {
-  var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
   return days[date.getUTCDay()] + date.getUTCDate()
 }
 
 function dateToTitle (date) {
-  var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
   return days[date.getUTCDay()] + ' ' + ordinalise(date.getUTCDate())
 }

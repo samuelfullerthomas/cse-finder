@@ -1,7 +1,7 @@
 import objectEach from 'slapdash/src/objectEach'
 
 export default function mapBySection (cses) {
-  var newSections = {}
+  const newSections = {}
   objectEach(cses, (sections, cseKey) => {
     objectEach(sections, (tasks, sectionKey) => {
       newSections[sectionKey] = newSections[sectionKey] || {}
