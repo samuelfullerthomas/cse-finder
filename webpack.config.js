@@ -1,8 +1,11 @@
 module.exports = {
-  entry: ['babel-polyfill', './src/cse-finder.js'],
+  entry: {
+    popup: ['babel-polyfill', './src/popup.js'],
+    options: './src/options.js'
+  },
   output: {
     path: __dirname + '/chrome_extension',
-    filename: 'bundle.js'
+    filename: '[name].js'
   },
   module: {
     loaders: [
