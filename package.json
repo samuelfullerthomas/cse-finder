@@ -1,8 +1,8 @@
 {
   "name": "cse-finder",
   "version": "1.0.0",
-  "description": "",
-  "main": "src/cse-finder.js",
+  "description": "Consolidates Pod Travel CSE queues into one view",
+  "main": "src/popup.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/KwanMan/cse-finder.git"
   },
-  "author": "",
+  "author": "Tommy Kwan",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/KwanMan/cse-finder/issues"

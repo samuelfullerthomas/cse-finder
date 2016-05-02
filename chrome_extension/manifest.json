@@ -2,8 +2,8 @@
   "manifest_version": 2,
 
   "name": "CSE Finder",
-  "description": "This extension shows a Google Image search result for the current page",
-  "version": "1.0",
+  "description": "Consolidates Pod Travel CSE queues into one view",
+  "version": "1.0.0",
 
   "options_ui": {
     "page": "options.html",
