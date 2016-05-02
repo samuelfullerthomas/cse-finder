@@ -76,6 +76,7 @@
 	exports.objectSome = objectSome;
 	exports.retrieve = retrieve;
 	exports.save = save;
+	exports.createElement = createElement;
 	function age(time) {
 	  var diff = now() - time;
 	  return Math.floor(diff / 60000);
@@ -149,6 +150,12 @@
 	  return new Promise(function (r) {
 	    return window.chrome.storage.local.set(obj, r);
 	  });
+	}
+
+	function createElement(html) {
+	  var el = document.createElement('div');
+	  el.innerHTML = html;
+	  return el.firstChild;
 	}
 
 /***/ }

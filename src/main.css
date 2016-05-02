@@ -1,58 +1,8 @@
-h3 {
-  border-bottom: 1px solid gray;
-  padding: 5px 10px 5px;
-  margin: 10px;
-  color: gray;
-}
-
 .Loader {
   width: 256px;
   height: 256px;
   background-image: url('https://d1m54pdnjzjnhe.cloudfront.net/thomascookairlines/t012/ajax-loader.gif');
   background-size: contain;
-}
-
-.Row {
-  display: flex;
-  width: 100%;
-}
-
-.Row-header {
-  position: fixed;
-  top: 25px;
-  background-color: white;
-}
-
-.List {
-  background-color: rgba(71, 178, 141, 0.7);
-  padding: 5px 20px;
-  margin: 0 1px;
-  box-sizing: border-box;
-  width: 25%;
-  min-height: 30px;
-}
-
-.List.isFull {
-  background-color: rgba(255, 0, 0, 0.7);
-}
-
-.List.isNeutral {
-  background-color: yellow;
-}
-
-.Task {
-  height: 20px;
-  line-height: 20px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.List-header {
-  background-color: white;
-  text-align: center;
-  font-weight: bold;
-  font-size: 19px;
 }
 
 .Refresh {
@@ -66,4 +16,62 @@ h3 {
 
 .Wrapper {
   margin-top: 60px;
+}
+
+.Section {
+  width: 100%;
+}
+
+.Section-title {
+  border-bottom: 1px solid gray;
+  padding: 5px 10px 5px;
+  margin: 10px;
+  color: gray;
+}
+
+.Section-innerWrapper {
+  display: flex;
+  width: 100%;
+}
+
+.Section--header {
+  position: fixed;
+  top: 25px;
+  background-color: white;
+}
+
+.Section--header .Cse {
+  background-color: white;
+  text-align: center;
+  font-weight: bold;
+  font-size: 19px;
+}
+
+.Cse {
+  background-color: yellow;
+  padding: 5px 20px;
+  margin: 0 1px;
+  box-sizing: border-box;
+  width: 25%;
+  min-height: 30px;
+}
+
+.Cse.isFull {
+  background-color: rgba(255, 0, 0, 0.7);
+}
+
+.Cse.isFree {
+  background-color: rgba(71, 178, 141, 0.7);
+}
+
+.Task {
+  height: 20px;
+  line-height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.isClickable {
+  cursor: pointer;
 }

@@ -65,3 +65,9 @@ export function retrieve (obj) {
 export function save (obj) {
   return new Promise(r => window.chrome.storage.local.set(obj, r))
 }
+
+export function createElement (html) {
+  var el = document.createElement('div')
+  el.innerHTML = html
+  return el.firstChild
+}

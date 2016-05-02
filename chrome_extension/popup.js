@@ -66,6 +66,7 @@
 	exports.objectSome = objectSome;
 	exports.retrieve = retrieve;
 	exports.save = save;
+	exports.createElement = createElement;
 	function age(time) {
 	  var diff = now() - time;
 	  return Math.floor(diff / 60000);
@@ -139,6 +140,12 @@
 	  return new Promise(function (r) {
 	    return window.chrome.storage.local.set(obj, r);
 	  });
+	}
+
+	function createElement(html) {
+	  var el = document.createElement('div');
+	  el.innerHTML = html;
+	  return el.firstChild;
 	}
 
 /***/ },
@@ -7969,9 +7976,17 @@
 
 	var _getQueues2 = _interopRequireDefault(_getQueues);
 
-	var _buildUI = __webpack_require__(312);
+	var _buildSections = __webpack_require__(312);
 
-	var _buildUI2 = _interopRequireDefault(_buildUI);
+	var _buildSections2 = _interopRequireDefault(_buildSections);
+
+	var _buildHeaders = __webpack_require__(313);
+
+	var _buildHeaders2 = _interopRequireDefault(_buildHeaders);
+
+	var _buildRefresh = __webpack_require__(314);
+
+	var _buildRefresh2 = _interopRequireDefault(_buildRefresh);
 
 	var _util = __webpack_require__(1);
 
@@ -7983,7 +7998,7 @@
 
 	var kickoff = function () {
 	  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(force) {
-	    var body, _ref, auth, _ref2, sections, time, html, refreshWrapper;
+	    var body, _ref, auth, _ref2, sections, time, $refresh, $headers, $sections;
 
 	    return regeneratorRuntime.wrap(function _callee$(_context) {
 	      while (1) {
@@ -8011,7 +8026,7 @@
 	            }
 
 	            authError();
-	            _context.next = 25;
+	            _context.next = 24;
 	            break;
 
 	          case 12:
@@ -8022,23 +8037,24 @@
 	            _ref2 = _context.sent;
 	            sections = _ref2.queues;
 	            time = _ref2.time;
-	            html = (0, _buildUI2.default)(sections, _config.cses.map(function (c) {
-	              return c.name;
-	            }));
-	            refreshWrapper = document.createElement('div');
 
-	            refreshWrapper.classList.add('Refresh');
-	            refreshWrapper.innerHTML = 'Last updated ' + (0, _util.age)(time) + ' minutes ago. <a href="#"> Refresh? </a>';
-	            refreshWrapper.querySelector('a').addEventListener('click', function (e) {
-	              e.preventDefault();
-	              kickoff(true);
-	            });
 
 	            body.innerHTML = '';
-	            body.appendChild(refreshWrapper);
-	            body.insertAdjacentHTML('beforeend', html);
 
-	          case 25:
+	            $refresh = (0, _buildRefresh2.default)(time, function () {
+	              return kickoff(true);
+	            });
+	            $headers = (0, _buildHeaders2.default)(_config.cses);
+	            $sections = (0, _buildSections2.default)(sections, _config.cses.map(function (c) {
+	              return c.name;
+	            }));
+
+
+	            body.appendChild($refresh);
+	            body.appendChild($headers);
+	            body.appendChild($sections);
+
+	          case 24:
 	          case 'end':
 	            return _context.stop();
 	        }
@@ -8213,7 +8229,11 @@
 	                currentSection = task.name;
 	                queue[currentSection] = [];
 	              } else {
-	                queue[currentSection].push(task.name);
+	                var url = 'https://app.asana.com/0/' + cse.id + '/' + task.id;
+	                queue[currentSection].push({
+	                  name: task.name,
+	                  url: url
+	                });
 	              }
 	            });
 	            return _context.abrupt('return', _defineProperty({}, cse.name, queue));
@@ -8285,9 +8305,11 @@
 	    Object.keys(sections).forEach(function (oldSectionName) {
 	      var newSectionName = matchOtherSections(oldSectionName) || matchDateSection(oldSectionName);
 	      if (newSectionName) {
+	        var isDateSection = newSectionName !== 'qa' && newSectionName !== 'xb' && newSectionName !== 'newtasks';
 	        newSections[newSectionName] = {
 	          tasks: sections[oldSectionName],
-	          full: /ooo|bank|leave|full/i.test(oldSectionName)
+	          full: isDateSection ? /ooo|bank|leave|full/i.test(oldSectionName) : false,
+	          free: isDateSection ? !/ooo|bank|leave|full/i.test(oldSectionName) : false
 	        };
 	      }
 	    });
@@ -8467,42 +8489,131 @@
 
 	'use strict';
 
-	var _buildSection = __webpack_require__(313);
-
-	var _buildSection2 = _interopRequireDefault(_buildSection);
-
-	var _buildHeaders = __webpack_require__(314);
-
-	var _buildHeaders2 = _interopRequireDefault(_buildHeaders);
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = buildSections;
 
 	var _util = __webpack_require__(1);
 
 	var _config = __webpack_require__(300);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function buildUI(sections, cses) {
+	function buildSections(sections, cses) {
 	  var currentDate = new Date();
 	  currentDate.setUTCDate(currentDate.getUTCDate() - 1);
+
+	  sections = enrichSections(sections, cses);
+
+	  var $wrapper = (0, _util.createElement)('<div class="Wrapper"></div>');
+
+	  sections.forEach(function (section) {
+	    var $section = buildSection(section, cses);
+	    $wrapper.appendChild($section);
+	  });
+
+	  return $wrapper;
+	}
+
+	function buildSection(_ref) {
+	  var title = _ref.title;
+	  var cses = _ref.cses;
+
+	  var html = '';
+	  html += '<div class="Section">';
+	  html += '<h3 class="Section-title">' + title + '</h3>';
+	  html += '<div class="Section-innerWrapper"></div>';
+	  html += '</div>';
+	  var $section = (0, _util.createElement)(html);
+
+	  var $innerWrapper = $section.querySelector('.Section-innerWrapper');
+
+	  cses.forEach(function (cse) {
+	    var $cse = buildCse(cse);
+	    $innerWrapper.appendChild($cse);
+	  });
+
+	  return $section;
+	}
+
+	function buildCse(cse) {
+	  var className = (0, _util.classnames)({
+	    Cse: true,
+	    isFull: cse.full,
+	    isFree: cse.free
+	  });
+
+	  var $cse = (0, _util.createElement)('<div class="' + className + '"></div>');
+	  cse.tasks.forEach(function (task) {
+	    var $task = (0, _util.createElement)('<div class="Task isClickable">' + task.name + '</div>');
+	    $task.addEventListener('click', function (e) {
+	      window.chrome.tabs.create({ url: task.url });
+	    });
+	    $cse.appendChild($task);
+	  });
+	  return $cse;
+	}
+
+	function enrichSections(sections, cses) {
+	  var output = [];
 	  var foundFree = false;
 
-	  var htmlSections = [];
+	  var currentDate = new Date();
+	  currentDate.setUTCDate(currentDate.getUTCDate() - 1);
 
-	  while (htmlSections.length < _config.minDays || !foundFree) {
+	  // Get Date sections
+
+	  var _loop = function _loop() {
 	    currentDate = getNextDay(currentDate);
-	    var section = sections[dateToKey(currentDate)] || {};
-	    var title = dateToTitle(currentDate);
-
-	    htmlSections.push((0, _buildSection2.default)(section, (0, _util.capitalise)(title), cses));
-	    foundFree = (0, _util.objectSome)(section, function (k) {
-	      return k.full;
+	    var targetSection = sections[dateToKey(currentDate)];
+	    var newSection = {
+	      title: (0, _util.capitalise)(dateToTitle(currentDate)),
+	      cses: cses.map(function (cse) {
+	        return targetSection[cse] || {
+	          free: true,
+	          full: false,
+	          tasks: []
+	        };
+	      })
+	    };
+	    output.push(newSection);
+	    foundFree = (0, _util.objectSome)(newSection.cses, function (k) {
+	      return k.free;
 	    }) ? true : foundFree;
+	  };
+
+	  while (output.length < _config.minDays || !foundFree) {
+	    _loop();
 	  }
 
-	  htmlSections.push((0, _buildSection2.default)(sections.qa, 'QA', cses, true));
-	  htmlSections.push((0, _buildSection2.default)(sections.xb, 'XB', cses, true));
+	  if (sections.qa) {
+	    var qaSection = {
+	      title: 'QA',
+	      cses: cses.map(function (cse) {
+	        return sections.qa[cse] || {
+	          free: false,
+	          full: false,
+	          tasks: []
+	        };
+	      })
+	    };
+	    output.push(qaSection);
+	  }
 
-	  return (0, _buildHeaders2.default)(cses) + '<div class="Wrapper"><a href="http://www.google.com">xdfcgvhbjknlm</a>' + htmlSections.join('') + '</div>';
+	  if (sections.xb) {
+	    var xbSection = {
+	      title: 'XB',
+	      cses: cses.map(function (cse) {
+	        return sections.xb[cse] || {
+	          free: false,
+	          full: false,
+	          tasks: []
+	        };
+	      })
+	    };
+	    output.push(xbSection);
+	  }
+
+	  return output;
 	}
 
 	function getNextDay(base) {
@@ -8535,53 +8646,8 @@
 	  return days[date.getUTCDay()] + ' ' + (0, _util.ordinalise)(date.getUTCDate());
 	}
 
-	module.exports = buildUI;
-
 /***/ },
 /* 313 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.default = buildSection;
-
-	var _util = __webpack_require__(1);
-
-	function buildSection(section, title, cses, neutral) {
-	  var html = '';
-	  html += '<h3>' + title + '</h3>';
-	  html += '<div class="Row">';
-	  html += cses.map(function (cse) {
-	    return section[cse] ? buildList(section[cse], neutral) : buildList({
-	      full: false,
-	      tasks: []
-	    }, neutral);
-	  }).join('');
-	  html += '</div>';
-	  return html;
-	}
-
-	function buildList(list, neutral) {
-	  var className = (0, _util.classnames)({
-	    List: true,
-	    isFull: !neutral && list.full,
-	    isNeutral: neutral
-	  });
-
-	  var html = '';
-	  html += '<div class="' + className + '">';
-	  html += list.tasks.map(function (t) {
-	    return '<div class="Task">' + t + '</div>';
-	  }).join('');
-	  html += '</div>';
-	  return html;
-	}
-
-/***/ },
-/* 314 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -8594,13 +8660,44 @@
 	var _util = __webpack_require__(1);
 
 	function buildHeaders(cses) {
+	  var $section = (0, _util.createElement)('<div class="Section Section--header"></div>');
+	  var $innerWrapper = (0, _util.createElement)('<div class="Section-innerWrapper"></div>');
+	  cses.forEach(function (cse) {
+	    var $header = (0, _util.createElement)('<div class="Cse"><span class="isClickable">' + cse.name + '</span></div>');
+	    $header.addEventListener('click', function () {
+	      window.chrome.tabs.create({ url: 'https://app.asana.com/0/' + cse.id });
+	    });
+	    $innerWrapper.appendChild($header);
+	  });
+	  $section.appendChild($innerWrapper);
+	  return $section;
+	}
+
+/***/ },
+/* 314 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = buildRefresh;
+
+	var _util = __webpack_require__(1);
+
+	function buildRefresh(time, action) {
 	  var html = '';
-	  html += '<div class="Row Row-header">';
-	  html += cses.map(function (cse) {
-	    return '<div class="List List-header">' + (0, _util.capitalise)(cse) + '</div>';
-	  }).join('');
+	  html += '<div class="Refresh">';
+	  html += 'Last updated ' + (0, _util.age)(time) + ' minutes ago. <a href="#"> Refresh? </a>';
 	  html += '</div>';
-	  return html;
+	  var $refresh = (0, _util.createElement)(html);
+	  $refresh.querySelector('a').addEventListener('click', function (e) {
+	    e.preventDefault();
+	    action();
+	  });
+
+	  return $refresh;
 	}
 
 /***/ },
@@ -8638,7 +8735,7 @@
 
 
 	// module
-	exports.push([module.id, "h3 {\n  border-bottom: 1px solid gray;\n  padding: 5px 10px 5px;\n  margin: 10px;\n  color: gray;\n}\n\n.Loader {\n  width: 256px;\n  height: 256px;\n  background-image: url('https://d1m54pdnjzjnhe.cloudfront.net/thomascookairlines/t012/ajax-loader.gif');\n  background-size: contain;\n}\n\n.Row {\n  display: flex;\n  width: 100%;\n}\n\n.Row-header {\n  position: fixed;\n  top: 25px;\n  background-color: white;\n}\n\n.List {\n  background-color: rgba(71, 178, 141, 0.7);\n  padding: 5px 20px;\n  margin: 0 1px;\n  box-sizing: border-box;\n  width: 25%;\n  min-height: 30px;\n}\n\n.List.isFull {\n  background-color: rgba(255, 0, 0, 0.7);\n}\n\n.List.isNeutral {\n  background-color: yellow;\n}\n\n.Task {\n  height: 20px;\n  line-height: 20px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.List-header {\n  background-color: white;\n  text-align: center;\n  font-weight: bold;\n  font-size: 19px;\n}\n\n.Refresh {\n  background-color: white;\n  position: fixed;\n  top: 0;\n  height: 25px;\n  line-height: 25px;\n  width: 100%;\n}\n\n.Wrapper {\n  margin-top: 60px;\n}", ""]);
+	exports.push([module.id, ".Loader {\n  width: 256px;\n  height: 256px;\n  background-image: url('https://d1m54pdnjzjnhe.cloudfront.net/thomascookairlines/t012/ajax-loader.gif');\n  background-size: contain;\n}\n\n.Refresh {\n  background-color: white;\n  position: fixed;\n  top: 0;\n  height: 25px;\n  line-height: 25px;\n  width: 100%;\n}\n\n.Wrapper {\n  margin-top: 60px;\n}\n\n.Section {\n  width: 100%;\n}\n\n.Section-title {\n  border-bottom: 1px solid gray;\n  padding: 5px 10px 5px;\n  margin: 10px;\n  color: gray;\n}\n\n.Section-innerWrapper {\n  display: flex;\n  width: 100%;\n}\n\n.Section--header {\n  position: fixed;\n  top: 25px;\n  background-color: white;\n}\n\n.Section--header .Cse {\n  background-color: white;\n  text-align: center;\n  font-weight: bold;\n  font-size: 19px;\n}\n\n.Cse {\n  background-color: yellow;\n  padding: 5px 20px;\n  margin: 0 1px;\n  box-sizing: border-box;\n  width: 25%;\n  min-height: 30px;\n}\n\n.Cse.isFull {\n  background-color: rgba(255, 0, 0, 0.7);\n}\n\n.Cse.isFree {\n  background-color: rgba(71, 178, 141, 0.7);\n}\n\n.Task {\n  height: 20px;\n  line-height: 20px;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.isClickable {\n  cursor: pointer;\n}\n", ""]);
 
 	// exports
 

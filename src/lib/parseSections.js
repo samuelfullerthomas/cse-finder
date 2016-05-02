@@ -6,9 +6,11 @@ export default function parseSections (cses) {
     Object.keys(sections).forEach(function (oldSectionName) {
       var newSectionName = matchOtherSections(oldSectionName) || matchDateSection(oldSectionName)
       if (newSectionName) {
+        const isDateSection = newSectionName !== 'qa' && newSectionName !== 'xb' && newSectionName !== 'newtasks'
         newSections[newSectionName] = {
           tasks: sections[oldSectionName],
-          full: /ooo|bank|leave|full/i.test(oldSectionName)
+          full: isDateSection ? /ooo|bank|leave|full/i.test(oldSectionName) : false,
+          free: isDateSection ? !/ooo|bank|leave|full/i.test(oldSectionName) : false
         }
       }
     })

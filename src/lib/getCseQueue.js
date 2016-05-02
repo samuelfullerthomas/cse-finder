@@ -11,7 +11,11 @@ export default async function getCseQueue (cse, auth) {
       currentSection = task.name
       queue[currentSection] = []
     } else {
-      queue[currentSection].push(task.name)
+      const url = `https://app.asana.com/0/${cse.id}/${task.id}`
+      queue[currentSection].push({
+        name: task.name,
+        url: url
+      })
     }
   })
   return {
