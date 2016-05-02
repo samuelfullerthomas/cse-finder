@@ -1,6 +1,6 @@
-var objectMap = require('slapdash/src/objectMap')
+import objectMap from 'slapdash/src/objectMap'
 
-function parseSections (cses) {
+export default function parseSections (cses) {
   return objectMap(cses, function (sections, cse) {
     var newSections = {}
     Object.keys(sections).forEach(function (oldSectionName) {
@@ -37,5 +37,3 @@ function matchOtherSections (title) {
   if (!matches || matches.length < 2) return false
   return matches[1].toLowerCase()
 }
-
-module.exports = parseSections

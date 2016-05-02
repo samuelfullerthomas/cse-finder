@@ -1,9 +1,8 @@
-var capitalise = require('../util/capitalise')
-var classnames = require('../util/classnames')
+import { capitalise, classnames } from './util'
 
-function buildSection (section, title, cses) {
+export default function buildSection (section, title, cses) {
   var html = ''
-  html += '<h3>' + capitalise(title) + '</h3>'
+  html += `<h3>${capitalise(title)}</h3>`
   html += '<div class="Row">'
   html += cses.map(function (cse) {
     if (section[cse]) {
@@ -25,7 +24,7 @@ function buildList (list) {
   })
 
   var html = ''
-  html += '<div class="' + className + '">'
+  html += `<div class="${className}">`
   html += list.tasks.map(buildTask).join('')
   html += '</div>'
 
@@ -35,5 +34,3 @@ function buildList (list) {
 function buildTask (name) {
   return '<div class="Task">' + name + '</div>'
 }
-
-module.exports = buildSection

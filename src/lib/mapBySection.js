@@ -1,4 +1,4 @@
-function mapBySection (cses) {
+export default function mapBySection (cses) {
   var sections = {}
   Object.keys(cses).forEach(function (cse) {
     Object.keys(cses[cse]).forEach(function (section) {
@@ -8,5 +8,3 @@ function mapBySection (cses) {
   })
   return sections
 }
-
-module.exports = mapBySection

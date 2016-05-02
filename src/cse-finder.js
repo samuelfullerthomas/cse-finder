@@ -1,55 +1,27 @@
 require('./main.css')
 
-var getCseQueue = require('./lib/getCseQueue')
-var parseSections = require('./lib/parseSections')
-var mapBySection = require('./lib/mapBySection')
-var buildUI = require('./lib/buildUI')
-var age = require('./util/age')
-var now = require('./util/now')
-var config = require('./config')
-var pollFor = require('./util/pollFor')
-var storage = require('./util/storage')
+import { cses } from './config'
+import getQueues from './lib/getQueues'
+import buildUI from './lib/buildUI'
+import { age, now, pollFor, retrieve } from './lib/util'
 
 var kickoff = async function (force) {
   var body = await pollFor(() => document.body)
   body.innerHTML = '<div class="loader"></div>'
-  var items = await storage.get({
-    auth: false,
-    cache: false
-  })
+  var { auth } = await retrieve({ auth: false })
 
-  if (!items.auth) {
+  if (!auth) {
     authError()
   } else {
-    var cses
-    var dataTime
+    var { queues: sections, time } = await getQueues(auth, force)
 
-    if (!force && items.cache && age(items.cache.time) < 5) {
-      dataTime = items.cache.time
-      cses = items.cache.data
-    } else {
-      cses = await Promise.all(config.cses.map(cse => getCseQueue(cse, items.auth)))
-      dataTime = now()
-      storage.set({
-        cache: {
-          time: now(),
-          data: cses
-        }
-      })
-    }
-
-    cses.unshift({})
-    cses = Object.assign.apply(Object, cses)
-    cses = parseSections(cses)
-    var sections = mapBySection(cses)
-
-    var html = buildUI(sections, config.cses.map((c) => c.name))
+    var html = buildUI(sections, cses.map((c) => c.name))
 
     var refreshWrapper = document.createElement('div')
-    refreshWrapper.innerHTML = 'Last updated ' + age(dataTime) + ' minutes ago. <a href="#"> Refresh? </a>'
+    refreshWrapper.innerHTML = 'Last updated ' + age(time) + ' minutes ago. <a href="#"> Refresh? </a>'
     refreshWrapper.querySelector('a').addEventListener('click', function (e) {
       e.preventDefault()
-      run(true)
+      kickoff(true)
     })
 
     body.innerHTML = ''

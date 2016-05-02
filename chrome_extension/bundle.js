@@ -7870,29 +7870,34 @@
 
 	'use strict';
 
+	var _config = __webpack_require__(299);
+
+	var _getQueues = __webpack_require__(300);
+
+	var _getQueues2 = _interopRequireDefault(_getQueues);
+
+	var _buildUI = __webpack_require__(310);
+
+	var _buildUI2 = _interopRequireDefault(_buildUI);
+
+	var _util = __webpack_require__(309);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
-	__webpack_require__(299);
-
-	var getCseQueue = __webpack_require__(303);
-	var parseSections = __webpack_require__(306);
-	var mapBySection = __webpack_require__(311);
-	var buildUI = __webpack_require__(312);
-	var age = __webpack_require__(318);
-	var now = __webpack_require__(319);
-	var config = __webpack_require__(305);
-	var pollFor = __webpack_require__(320);
-	var storage = __webpack_require__(321);
+	__webpack_require__(313);
 
 	var kickoff = function () {
 	  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(force) {
-	    var body, items, cses, dataTime, sections, html, refreshWrapper;
+	    var body, _ref, auth, _ref2, sections, time, html, refreshWrapper;
+
 	    return regeneratorRuntime.wrap(function _callee$(_context) {
 	      while (1) {
 	        switch (_context.prev = _context.next) {
 	          case 0:
 	            _context.next = 2;
-	            return pollFor(function () {
+	            return (0, _util.pollFor)(function () {
 	              return document.body;
 	            });
 
@@ -7901,73 +7906,45 @@
 
 	            body.innerHTML = '<div class="loader"></div>';
 	            _context.next = 6;
-	            return storage.get({
-	              auth: false,
-	              cache: false
-	            });
+	            return (0, _util.retrieve)({ auth: false });
 
 	          case 6:
-	            items = _context.sent;
+	            _ref = _context.sent;
+	            auth = _ref.auth;
 
-	            if (items.auth) {
-	              _context.next = 11;
+	            if (auth) {
+	              _context.next = 12;
 	              break;
 	            }
 
 	            authError();
-	            _context.next = 32;
+	            _context.next = 24;
 	            break;
 
-	          case 11:
-	            if (!(!force && items.cache && age(items.cache.time) < 5)) {
-	              _context.next = 16;
-	              break;
-	            }
+	          case 12:
+	            _context.next = 14;
+	            return (0, _getQueues2.default)(auth, force);
 
-	            dataTime = items.cache.time;
-	            cses = items.cache.data;
-	            _context.next = 21;
-	            break;
-
-	          case 16:
-	            _context.next = 18;
-	            return Promise.all(config.cses.map(function (cse) {
-	              return getCseQueue(cse, items.auth);
-	            }));
-
-	          case 18:
-	            cses = _context.sent;
-
-	            dataTime = now();
-	            storage.set({
-	              cache: {
-	                time: now(),
-	                data: cses
-	              }
-	            });
-
-	          case 21:
-
-	            cses.unshift({});
-	            cses = Object.assign.apply(Object, cses);
-	            cses = parseSections(cses);
-	            sections = mapBySection(cses);
-	            html = buildUI(sections, config.cses.map(function (c) {
+	          case 14:
+	            _ref2 = _context.sent;
+	            sections = _ref2.queues;
+	            time = _ref2.time;
+	            html = (0, _buildUI2.default)(sections, _config.cses.map(function (c) {
 	              return c.name;
 	            }));
 	            refreshWrapper = document.createElement('div');
 
-	            refreshWrapper.innerHTML = 'Last updated ' + age(dataTime) + ' minutes ago. <a href="#"> Refresh? </a>';
+	            refreshWrapper.innerHTML = 'Last updated ' + (0, _util.age)(time) + ' minutes ago. <a href="#"> Refresh? </a>';
 	            refreshWrapper.querySelector('a').addEventListener('click', function (e) {
 	              e.preventDefault();
-	              run(true);
+	              kickoff(true);
 	            });
 
 	            body.innerHTML = '';
 	            body.appendChild(refreshWrapper);
 	            body.insertAdjacentHTML('beforeend', html);
 
-	          case 32:
+	          case 24:
 	          case 'end':
 	            return _context.stop();
 	        }
@@ -7997,15 +7974,625 @@
 
 /***/ },
 /* 299 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var endpoint = exports.endpoint = 'https://app.asana.com/api/1.0/';
+
+	var cses = exports.cses = [{ name: 'Tommy', id: '41755044194088' }, { name: 'Jimmy', id: '76629447954998' }, { name: 'Stefi', id: '45131341129610' }, { name: 'David', id: '19208422049726' }];
+
+/***/ },
+/* 300 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _getCseQueue = __webpack_require__(301);
+
+	var _getCseQueue2 = _interopRequireDefault(_getCseQueue);
+
+	var _parseSections = __webpack_require__(303);
+
+	var _parseSections2 = _interopRequireDefault(_parseSections);
+
+	var _mapBySection = __webpack_require__(308);
+
+	var _mapBySection2 = _interopRequireDefault(_mapBySection);
+
+	var _config = __webpack_require__(299);
+
+	var _util = __webpack_require__(309);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
+	exports.default = function () {
+	  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(auth, force) {
+	    var _ref, cache, queues, data;
+
+	    return regeneratorRuntime.wrap(function _callee$(_context) {
+	      while (1) {
+	        switch (_context.prev = _context.next) {
+	          case 0:
+	            _context.next = 2;
+	            return (0, _util.retrieve)({ cache: false });
+
+	          case 2:
+	            _ref = _context.sent;
+	            cache = _ref.cache;
+
+	            if (!(!force && cache && (0, _util.age)(cache.time) < 5)) {
+	              _context.next = 6;
+	              break;
+	            }
+
+	            return _context.abrupt('return', cache);
+
+	          case 6:
+	            _context.next = 8;
+	            return Promise.all(_config.cses.map(function (cse) {
+	              return (0, _getCseQueue2.default)(cse, auth);
+	            }));
+
+	          case 8:
+	            queues = _context.sent;
+
+	            queues = Object.assign.apply(Object, [{}].concat(queues));
+	            queues = (0, _parseSections2.default)(queues);
+	            queues = (0, _mapBySection2.default)(queues);
+
+	            data = { queues: queues, time: (0, _util.now)() };
+
+
+	            (0, _util.save)({ cache: data });
+
+	            return _context.abrupt('return', data);
+
+	          case 15:
+	          case 'end':
+	            return _context.stop();
+	        }
+	      }
+	    }, _callee, this);
+	  }));
+
+	  function getQueues(_x, _x2) {
+	    return ref.apply(this, arguments);
+	  }
+
+	  return getQueues;
+	}();
+
+/***/ },
+/* 301 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _request = __webpack_require__(302);
+
+	var _request2 = _interopRequireDefault(_request);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+
+	exports.default = function () {
+	  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(cse, auth) {
+	    var path, _ref, tasks, queue, currentSection;
+
+	    return regeneratorRuntime.wrap(function _callee$(_context) {
+	      while (1) {
+	        switch (_context.prev = _context.next) {
+	          case 0:
+	            path = 'tasks?workspace=896401739841&completed_since=now&assignee=' + cse.id;
+	            _context.next = 3;
+	            return (0, _request2.default)(path, auth, 'GET');
+
+	          case 3:
+	            _ref = _context.sent;
+	            tasks = _ref.data;
+	            queue = { 'new': [] };
+	            currentSection = 'new';
+
+	            tasks.forEach(function (task) {
+	              if (/:$/i.test(task.name)) {
+	                currentSection = task.name;
+	                queue[currentSection] = [];
+	              } else {
+	                queue[currentSection].push(task.name);
+	              }
+	            });
+	            return _context.abrupt('return', _defineProperty({}, cse.name, queue));
+
+	          case 9:
+	          case 'end':
+	            return _context.stop();
+	        }
+	      }
+	    }, _callee, this);
+	  }));
+
+	  function getCseQueue(_x, _x2) {
+	    return ref.apply(this, arguments);
+	  }
+
+	  return getCseQueue;
+	}();
+
+/***/ },
+/* 302 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = request;
+
+	var _config = __webpack_require__(299);
+
+	function request(url, auth, type) {
+	  return new Promise(function (resolve) {
+	    var xhr = new window.XMLHttpRequest();
+	    xhr.onload = function () {
+	      resolve(xhr.response);
+	    };
+	    xhr.onerror = function (e) {
+	      throw e;
+	    };
+	    xhr.open(type, _config.endpoint + url);
+	    xhr.setRequestHeader('Authorization', 'Bearer ' + auth);
+	    xhr.responseType = 'json';
+	    xhr.send();
+	  });
+	}
+
+/***/ },
+/* 303 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = parseSections;
+
+	var _objectMap = __webpack_require__(304);
+
+	var _objectMap2 = _interopRequireDefault(_objectMap);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function parseSections(cses) {
+	  return (0, _objectMap2.default)(cses, function (sections, cse) {
+	    var newSections = {};
+	    Object.keys(sections).forEach(function (oldSectionName) {
+	      var newSectionName = matchOtherSections(oldSectionName);
+	      if (!newSectionName) {
+	        newSectionName = matchDateSection(oldSectionName);
+	      }
+	      if (newSectionName) {
+	        var status = 'free';
+	        if (/full/i.test(oldSectionName)) {
+	          status = 'full';
+	        } else if (/ooo|bank|leave/i.test(oldSectionName)) {
+	          status = 'ooo';
+	        }
+	        newSections[newSectionName] = {
+	          tasks: sections[oldSectionName],
+	          status: status
+	        };
+	      }
+	    });
+	    return newSections;
+	  });
+	}
+
+	function matchDateSection(title) {
+	  var regex = /(monday|tuesday|wednesday|thursday|friday)[^0-9]*(\d*)(?:st|nd|rd|th)/i;
+	  var matches = regex.exec(title);
+	  if (!matches || matches.length < 3) return false;
+	  return (matches[1] + matches[2]).toLowerCase();
+	}
+
+	function matchOtherSections(title) {
+	  var matches = /(newtasks|qa|xb)/i.exec(title);
+	  if (!matches || matches.length < 2) return false;
+	  return matches[1].toLowerCase();
+	}
+
+/***/ },
+/* 304 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = __webpack_require__(305)
+	var keys = __webpack_require__(307)
+
+	module.exports = function objectMap (object, callback, context) {
+	  var result = {}
+	  for (var key in object) {
+	    if (object.hasOwnProperty(key)) {
+	      result[key] = callback.call(context, object[key], key, object)
+	    }
+	  }
+	  return result
+	}
+
+	module.exports.asArray = function objectMapAsArray (object, callback, context) {
+	  return map(keys(object), function (key) {
+	    return callback.call(context, object[key], key, object)
+	  }, context)
+	}
+
+
+/***/ },
+/* 305 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isNative = __webpack_require__(306)
+	var map = Array.prototype.map
+	module.exports = isNative(map)
+	  ? function nativeMap (array, callback, context) {
+	    return map.call(array, callback, context)
+	  }
+	  : function map (array, callback, context) {
+	    var l = array.length
+	    var output = new Array(l)
+	    for (var i = 0; i < l; i++) {
+	      output[i] = callback.call(context, array[i], i, array)
+	    }
+	    return output
+	  }
+
+
+/***/ },
+/* 306 */
+/***/ function(module, exports) {
+
+	// Checks to see whether a specified method is a browser native
+	module.exports = function isNative (method) {
+	  return method && typeof method === 'function' && regexpIsNative.test(toSource(method))
+	}
+
+	// TODO: Check if safe/featurefill
+	var toString = Function.prototype.toString
+	var hasOwnProperty = Object.prototype.hasOwnProperty
+
+	// Characters to escape in a regex
+	var regexpCharacters = /[\\^$.*+?()[\]{}|]/g
+
+	// Used to detect native methods
+	var regexpIsNativeFn = toString.call(hasOwnProperty)
+	  .replace(regexpCharacters, '\\$&')
+	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?')
+	var regexpIsNative = RegExp('^' + regexpIsNativeFn + '$')
+
+	// Attempts to coerce a function to a string without using its `toString` method
+	function toSource (func) {
+	  if (!func) return ''
+	  try {
+	    return toString.call(func)
+	  } catch (e) {}
+	  try {
+	    return (func + '')
+	  } catch (e) {}
+	}
+
+
+/***/ },
+/* 307 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isNative = __webpack_require__(306)
+	var keys = Object.keys
+	module.exports = isNative(keys)
+	  ? keys
+	  : function keys (object) {
+	    var keys = []
+	    for (var key in object) {
+	      if (object.hasOwnProperty(key)) keys.push(key)
+	    }
+	    return keys
+	  }
+
+
+/***/ },
+/* 308 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = mapBySection;
+	function mapBySection(cses) {
+	  var sections = {};
+	  Object.keys(cses).forEach(function (cse) {
+	    Object.keys(cses[cse]).forEach(function (section) {
+	      sections[section] = sections[section] || {};
+	      sections[section][cse] = cses[cse][section];
+	    });
+	  });
+	  return sections;
+	}
+
+/***/ },
+/* 309 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.age = age;
+	exports.now = now;
+	exports.capitalise = capitalise;
+	exports.ordinalise = ordinalise;
+	exports.classnames = classnames;
+	exports.pollFor = pollFor;
+	exports.retrieve = retrieve;
+	exports.save = save;
+	function age(time) {
+	  var diff = now() - time;
+	  return Math.floor(diff / 60000);
+	}
+
+	function now() {
+	  return new Date().getTime();
+	}
+
+	function capitalise(str, allWords) {
+	  if (allWords) {
+	    return str.split(' ').map(function (w) {
+	      return capitalise(w, false);
+	    }).join(' ');
+	  }
+	  return str[0].toUpperCase() + str.slice(1).toLowerCase();
+	}
+
+	function ordinalise(i) {
+	  var j = i % 10;
+	  var k = i % 100;
+	  if (j === 1 && k !== 11) {
+	    return i + 'st';
+	  }
+	  if (j === 2 && k !== 12) {
+	    return i + 'nd';
+	  }
+	  if (j === 3 && k !== 13) {
+	    return i + 'rd';
+	  }
+	  return i + 'th';
+	}
+
+	function classnames(classes) {
+	  var output = [];
+	  Object.keys(classes).forEach(function (classname) {
+	    if (classes[classname]) {
+	      output.push(classname);
+	    }
+	  });
+	  return output.join(' ');
+	}
+
+	function pollFor(condition) {
+	  function poll(resolve) {
+	    var result = condition();
+	    if (result) {
+	      resolve(result);
+	    } else {
+	      window.setTimeout(function () {
+	        return poll(resolve);
+	      }, 100);
+	    }
+	  }
+	  return new Promise(function (r) {
+	    poll(r);
+	  });
+	}
+
+	function retrieve(obj) {
+	  return new Promise(function (r) {
+	    window.chrome.storage.local.get(obj, r);
+	  });
+	}
+
+	function save(obj) {
+	  return new Promise(function (r) {
+	    window.chrome.storage.local.set(obj, r);
+	  });
+	}
+
+/***/ },
+/* 310 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _buildSection = __webpack_require__(311);
+
+	var _buildSection2 = _interopRequireDefault(_buildSection);
+
+	var _buildHeaders = __webpack_require__(312);
+
+	var _buildHeaders2 = _interopRequireDefault(_buildHeaders);
+
+	var _util = __webpack_require__(309);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function buildUI(sections, cses) {
+	  var currentDate = new Date();
+	  var section;
+	  var title;
+	  var foundFree = false;
+
+	  var htmlSections = [];
+
+	  htmlSections.push((0, _buildHeaders2.default)(cses));
+
+	  while (htmlSections.length < 10 || !foundFree) {
+	    section = sections[dateToKey(currentDate)] || {};
+	    title = dateToTitle(currentDate);
+
+	    htmlSections.push((0, _buildSection2.default)(section, title, cses));
+	    if (objectSome(section, function (k) {
+	      return k.status === 'free';
+	    })) {
+	      foundFree = true;
+	    }
+	    currentDate = getNextDay(currentDate);
+	  }
+
+	  return htmlSections.join('');
+	}
+
+	function getNextDay(base) {
+	  var next = new Date(base.getTime());
+	  do {
+	    next.setUTCDate(next.getUTCDate() + 1);
+	  } while (!workingDay(next));
+	  return next;
+	}
+
+	function workingDay(date) {
+	  var day = date.getUTCDay();
+	  if (day === 0 || day === 6) {
+	    return false;
+	  }
+	  if (isBankHoliday(date)) {
+	    return false;
+	  }
+	  return true;
+	}
+
+	function isBankHoliday(date) {
+	  var bankHolidays = [[5 - 1, 2], [5 - 1, 30], [8 - 1, 29], [12 - 1, 26], [12 - 1, 27]];
+	  return bankHolidays.some(function (b) {
+	    return date.getUTCDate() === b[1] && date.getUTCMonth() === b[0];
+	  });
+	}
+
+	function dateToKey(date) {
+	  var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+	  return days[date.getUTCDay()] + date.getUTCDate();
+	}
+
+	function dateToTitle(date) {
+	  var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+	  return days[date.getUTCDay()] + ' ' + (0, _util.ordinalise)(date.getUTCDate());
+	}
+
+	function objectSome(obj, fn) {
+	  return Object.keys(obj).some(function (key) {
+	    return fn(obj[key]);
+	  });
+	}
+
+	module.exports = buildUI;
+
+/***/ },
+/* 311 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = buildSection;
+
+	var _util = __webpack_require__(309);
+
+	function buildSection(section, title, cses) {
+	  var html = '';
+	  html += '<h3>' + (0, _util.capitalise)(title) + '</h3>';
+	  html += '<div class="Row">';
+	  html += cses.map(function (cse) {
+	    if (section[cse]) {
+	      return buildList(section[cse]);
+	    }
+	    return buildList({
+	      status: 'free',
+	      tasks: []
+	    });
+	  }).join('');
+	  html += '</div>';
+	  return html;
+	}
+
+	function buildList(list) {
+	  var className = (0, _util.classnames)({
+	    List: true,
+	    isFull: list.status === 'full' || list.status === 'ooo'
+	  });
+
+	  var html = '';
+	  html += '<div class="' + className + '">';
+	  html += list.tasks.map(buildTask).join('');
+	  html += '</div>';
+
+	  return html;
+	}
+
+	function buildTask(name) {
+	  return '<div class="Task">' + name + '</div>';
+	}
+
+/***/ },
+/* 312 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = buildHeaders;
+
+	var _util = __webpack_require__(309);
+
+	function buildHeaders(cses) {
+	  var html = '';
+	  html += '<div class="Row">';
+	  html += cses.map(function (cse) {
+	    return '<div class="List List-header">' + (0, _util.capitalise)(cse) + '</div>';
+	  }).join('');
+	  html += '</div>';
+	  return html;
+	}
+
+/***/ },
+/* 313 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(300);
+	var content = __webpack_require__(314);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(302)(content, {});
+	var update = __webpack_require__(316)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -8022,10 +8609,10 @@
 	}
 
 /***/ },
-/* 300 */
+/* 314 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(301)();
+	exports = module.exports = __webpack_require__(315)();
 	// imports
 
 
@@ -8036,7 +8623,7 @@
 
 
 /***/ },
-/* 301 */
+/* 315 */
 /***/ function(module, exports) {
 
 	/*
@@ -8092,7 +8679,7 @@
 
 
 /***/ },
-/* 302 */
+/* 316 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -8342,535 +8929,6 @@
 			URL.revokeObjectURL(oldSrc);
 	}
 
-
-/***/ },
-/* 303 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var getCseQueue = function () {
-	  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(cse, auth) {
-	    var path, json, tasks, queue, currentSection, output;
-	    return regeneratorRuntime.wrap(function _callee$(_context) {
-	      while (1) {
-	        switch (_context.prev = _context.next) {
-	          case 0:
-	            path = 'tasks?workspace=896401739841&completed_since=now&assignee=' + cse.id;
-	            _context.next = 3;
-	            return request(path, auth, 'GET');
-
-	          case 3:
-	            json = _context.sent;
-	            tasks = json.data;
-	            queue = { 'new': [] };
-	            currentSection = 'new';
-
-	            tasks.forEach(function (task) {
-	              if (/:$/i.test(task.name)) {
-	                currentSection = task.name;
-	                queue[currentSection] = [];
-	              } else {
-	                queue[currentSection].push(task.name);
-	              }
-	            });
-	            output = {};
-
-	            output[cse.name] = queue;
-	            return _context.abrupt('return', output);
-
-	          case 11:
-	          case 'end':
-	            return _context.stop();
-	        }
-	      }
-	    }, _callee, this);
-	  }));
-
-	  return function getCseQueue(_x, _x2) {
-	    return ref.apply(this, arguments);
-	  };
-	}();
-
-	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
-
-	var request = __webpack_require__(304);
-
-	module.exports = getCseQueue;
-
-/***/ },
-/* 304 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var config = __webpack_require__(305);
-
-	module.exports = function request(url, auth, type) {
-	  return new Promise(function (resolve) {
-	    var xhr = new window.XMLHttpRequest();
-	    xhr.onload = function () {
-	      resolve(xhr.response);
-	    };
-	    xhr.onerror = function (e) {
-	      throw e;
-	    };
-	    xhr.open(type, config.endpoint + url);
-	    xhr.setRequestHeader('Authorization', 'Bearer ' + auth);
-	    xhr.responseType = 'json';
-	    xhr.send();
-	  });
-	};
-
-/***/ },
-/* 305 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	module.exports = {
-	  endpoint: 'https://app.asana.com/api/1.0/',
-	  cses: [{ name: 'Tommy', id: '41755044194088' }, { name: 'Jimmy', id: '76629447954998' }, { name: 'Stefi', id: '45131341129610' }, { name: 'David', id: '19208422049726' }]
-	};
-
-/***/ },
-/* 306 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var objectMap = __webpack_require__(307);
-
-	function parseSections(cses) {
-	  return objectMap(cses, function (sections, cse) {
-	    var newSections = {};
-	    Object.keys(sections).forEach(function (oldSectionName) {
-	      var newSectionName = matchOtherSections(oldSectionName);
-	      if (!newSectionName) {
-	        newSectionName = matchDateSection(oldSectionName);
-	      }
-	      if (newSectionName) {
-	        var status = 'free';
-	        if (/full/i.test(oldSectionName)) {
-	          status = 'full';
-	        } else if (/ooo|bank|leave/i.test(oldSectionName)) {
-	          status = 'ooo';
-	        }
-	        newSections[newSectionName] = {
-	          tasks: sections[oldSectionName],
-	          status: status
-	        };
-	      }
-	    });
-	    return newSections;
-	  });
-	}
-
-	function matchDateSection(title) {
-	  var regex = /(monday|tuesday|wednesday|thursday|friday)[^0-9]*(\d*)(?:st|nd|rd|th)/i;
-	  var matches = regex.exec(title);
-	  if (!matches || matches.length < 3) return false;
-	  return (matches[1] + matches[2]).toLowerCase();
-	}
-
-	function matchOtherSections(title) {
-	  var matches = /(newtasks|qa|xb)/i.exec(title);
-	  if (!matches || matches.length < 2) return false;
-	  return matches[1].toLowerCase();
-	}
-
-	module.exports = parseSections;
-
-/***/ },
-/* 307 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var map = __webpack_require__(308)
-	var keys = __webpack_require__(310)
-
-	module.exports = function objectMap (object, callback, context) {
-	  var result = {}
-	  for (var key in object) {
-	    if (object.hasOwnProperty(key)) {
-	      result[key] = callback.call(context, object[key], key, object)
-	    }
-	  }
-	  return result
-	}
-
-	module.exports.asArray = function objectMapAsArray (object, callback, context) {
-	  return map(keys(object), function (key) {
-	    return callback.call(context, object[key], key, object)
-	  }, context)
-	}
-
-
-/***/ },
-/* 308 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isNative = __webpack_require__(309)
-	var map = Array.prototype.map
-	module.exports = isNative(map)
-	  ? function nativeMap (array, callback, context) {
-	    return map.call(array, callback, context)
-	  }
-	  : function map (array, callback, context) {
-	    var l = array.length
-	    var output = new Array(l)
-	    for (var i = 0; i < l; i++) {
-	      output[i] = callback.call(context, array[i], i, array)
-	    }
-	    return output
-	  }
-
-
-/***/ },
-/* 309 */
-/***/ function(module, exports) {
-
-	// Checks to see whether a specified method is a browser native
-	module.exports = function isNative (method) {
-	  return method && typeof method === 'function' && regexpIsNative.test(toSource(method))
-	}
-
-	// TODO: Check if safe/featurefill
-	var toString = Function.prototype.toString
-	var hasOwnProperty = Object.prototype.hasOwnProperty
-
-	// Characters to escape in a regex
-	var regexpCharacters = /[\\^$.*+?()[\]{}|]/g
-
-	// Used to detect native methods
-	var regexpIsNativeFn = toString.call(hasOwnProperty)
-	  .replace(regexpCharacters, '\\$&')
-	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?')
-	var regexpIsNative = RegExp('^' + regexpIsNativeFn + '$')
-
-	// Attempts to coerce a function to a string without using its `toString` method
-	function toSource (func) {
-	  if (!func) return ''
-	  try {
-	    return toString.call(func)
-	  } catch (e) {}
-	  try {
-	    return (func + '')
-	  } catch (e) {}
-	}
-
-
-/***/ },
-/* 310 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isNative = __webpack_require__(309)
-	var keys = Object.keys
-	module.exports = isNative(keys)
-	  ? keys
-	  : function keys (object) {
-	    var keys = []
-	    for (var key in object) {
-	      if (object.hasOwnProperty(key)) keys.push(key)
-	    }
-	    return keys
-	  }
-
-
-/***/ },
-/* 311 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	function mapBySection(cses) {
-	  var sections = {};
-	  Object.keys(cses).forEach(function (cse) {
-	    Object.keys(cses[cse]).forEach(function (section) {
-	      sections[section] = sections[section] || {};
-	      sections[section][cse] = cses[cse][section];
-	    });
-	  });
-	  return sections;
-	}
-
-	module.exports = mapBySection;
-
-/***/ },
-/* 312 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var buildSection = __webpack_require__(313);
-	var buildHeaders = __webpack_require__(316);
-	var ordinalise = __webpack_require__(317);
-
-	function buildUI(sections, cses) {
-	  var currentDate = new Date();
-	  var section;
-	  var title;
-	  var foundFree = false;
-
-	  var htmlSections = [];
-
-	  htmlSections.push(buildHeaders(cses));
-
-	  while (htmlSections.length < 10 || !foundFree) {
-	    section = sections[dateToKey(currentDate)] || {};
-	    title = dateToTitle(currentDate);
-
-	    htmlSections.push(buildSection(section, title, cses));
-	    if (objectSome(section, function (k) {
-	      return k.status === 'free';
-	    })) {
-	      foundFree = true;
-	    }
-	    currentDate = getNextDay(currentDate);
-	  }
-
-	  return htmlSections.join('');
-	}
-
-	function getNextDay(base) {
-	  var next = new Date(base.getTime());
-	  do {
-	    next.setUTCDate(next.getUTCDate() + 1);
-	  } while (!workingDay(next));
-	  return next;
-	}
-
-	function workingDay(date) {
-	  var day = date.getUTCDay();
-	  if (day === 0 || day === 6) {
-	    return false;
-	  }
-	  if (isBankHoliday(date)) {
-	    return false;
-	  }
-	  return true;
-	}
-
-	function isBankHoliday(date) {
-	  var bankHolidays = [[5 - 1, 2], [5 - 1, 30], [8 - 1, 29], [12 - 1, 26], [12 - 1, 27]];
-	  return bankHolidays.some(function (b) {
-	    return date.getUTCDate() === b[1] && date.getUTCMonth() === b[0];
-	  });
-	}
-
-	function dateToKey(date) {
-	  var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-	  return days[date.getUTCDay()] + date.getUTCDate();
-	}
-
-	function dateToTitle(date) {
-	  var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-	  return days[date.getUTCDay()] + ' ' + ordinalise(date.getUTCDate());
-	}
-
-	function objectSome(obj, fn) {
-	  return Object.keys(obj).some(function (key) {
-	    return fn(obj[key]);
-	  });
-	}
-
-	module.exports = buildUI;
-
-/***/ },
-/* 313 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var capitalise = __webpack_require__(314);
-	var classnames = __webpack_require__(315);
-
-	function buildSection(section, title, cses) {
-	  var html = '';
-	  html += '<h3>' + capitalise(title) + '</h3>';
-	  html += '<div class="Row">';
-	  html += cses.map(function (cse) {
-	    if (section[cse]) {
-	      return buildList(section[cse]);
-	    }
-	    return buildList({
-	      status: 'free',
-	      tasks: []
-	    });
-	  }).join('');
-	  html += '</div>';
-	  return html;
-	}
-
-	function buildList(list) {
-	  var className = classnames({
-	    List: true,
-	    isFull: list.status === 'full' || list.status === 'ooo'
-	  });
-
-	  var html = '';
-	  html += '<div class="' + className + '">';
-	  html += list.tasks.map(buildTask).join('');
-	  html += '</div>';
-
-	  return html;
-	}
-
-	function buildTask(name) {
-	  return '<div class="Task">' + name + '</div>';
-	}
-
-	module.exports = buildSection;
-
-/***/ },
-/* 314 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	function capitalise(str, allWords) {
-	  if (allWords) {
-	    return str.split(' ').map(function (w) {
-	      return capitalise(w, false);
-	    }).join(' ');
-	  }
-	  return str[0].toUpperCase() + str.slice(1).toLowerCase();
-	}
-
-	module.exports = capitalise;
-
-/***/ },
-/* 315 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	function classnames(classes) {
-	  var output = [];
-	  Object.keys(classes).forEach(function (classname) {
-	    if (classes[classname]) {
-	      output.push(classname);
-	    }
-	  });
-	  return output.join(' ');
-	}
-
-	module.exports = classnames;
-
-/***/ },
-/* 316 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var capitalise = __webpack_require__(314);
-
-	function buildHeaders(cses) {
-	  var html = '';
-	  html += '<div class="Row">';
-	  html += cses.map(function (cse) {
-	    return '<div class="List List-header">' + capitalise(cse) + '</div>';
-	  }).join('');
-	  html += '</div>';
-	  return html;
-	}
-
-	module.exports = buildHeaders;
-
-/***/ },
-/* 317 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	function ordinalise(i) {
-	  var j = i % 10;
-	  var k = i % 100;
-	  if (j === 1 && k !== 11) {
-	    return i + 'st';
-	  }
-	  if (j === 2 && k !== 12) {
-	    return i + 'nd';
-	  }
-	  if (j === 3 && k !== 13) {
-	    return i + 'rd';
-	  }
-	  return i + 'th';
-	}
-
-	module.exports = ordinalise;
-
-/***/ },
-/* 318 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	function age(time) {
-	  var now = new Date();
-	  var diff = now.getTime() - time;
-	  return Math.floor(diff / 60000);
-	}
-
-	module.exports = age;
-
-/***/ },
-/* 319 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	function now() {
-	  return new Date().getTime();
-	}
-
-	module.exports = now;
-
-/***/ },
-/* 320 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	function pollFor(condition) {
-	  function poll(resolve) {
-	    var result = condition();
-	    if (result) {
-	      resolve(result);
-	    } else {
-	      window.setTimeout(function () {
-	        return poll(resolve);
-	      }, 100);
-	    }
-	  }
-	  return new Promise(function (r) {
-	    poll(r);
-	  });
-	}
-
-	module.exports = pollFor;
-
-/***/ },
-/* 321 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	function get(obj) {
-	  return new Promise(function (r) {
-	    window.chrome.storage.local.get(obj, r);
-	  });
-	}
-
-	function set(obj) {
-	  return new Promise(function (r) {
-	    window.chrome.storage.local.set(obj, r);
-	  });
-	}
-
-	module.exports = {
-	  get: get,
-	  set: set
-	};
 
 /***/ }
 /******/ ]);

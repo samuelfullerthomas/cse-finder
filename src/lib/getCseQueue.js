@@ -1,9 +1,8 @@
-var request = require('./request')
+import request from './request'
 
-async function getCseQueue (cse, auth) {
-  var path = 'tasks?workspace=896401739841&completed_since=now&assignee=' + cse.id
-  var json = await request(path, auth, 'GET')
-  var tasks = json.data
+export default async function getCseQueue (cse, auth) {
+  var path = `tasks?workspace=896401739841&completed_since=now&assignee=${cse.id}`
+  var { data: tasks} = await request(path, auth, 'GET')
 
   var queue = { 'new': [] }
   var currentSection = 'new'
@@ -15,9 +14,8 @@ async function getCseQueue (cse, auth) {
       queue[currentSection].push(task.name)
     }
   })
-  var output = {}
-  output[cse.name] = queue
-  return output
+  return {
+    [cse.name]: queue
+  }
 }
 
-module.exports = getCseQueue

@@ -1,13 +1,11 @@
-var capitalise = require('../util/capitalise')
+import { capitalise } from './util'
 
-function buildHeaders (cses) {
+export default function buildHeaders (cses) {
   var html = ''
   html += '<div class="Row">'
   html += cses.map(function (cse) {
-    return '<div class="List List-header">' + capitalise(cse) + '</div>'
+    return `<div class="List List-header">${capitalise(cse)}</div>`
   }).join('')
   html += '</div>'
   return html
 }
-
-module.exports = buildHeaders
