@@ -1,7 +1,7 @@
 {
   "name": "cse-finder",
   "version": "1.0.0",
-  "description": "Consolidates Pod Travel CSE queues into one view",
+  "description": "Consolidates Pod Bucci CSE queues into one view",
   "main": "src/popup.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
