@@ -7,65 +7,55 @@ var buildUI = require('./lib/buildUI')
 var age = require('./util/age')
 var now = require('./util/now')
 var config = require('./config')
+var pollFor = require('./util/pollFor')
+var storage = require('./util/storage')
 
-var dataTime
-
-var run = function (force) {
-  document.body.innerHTML = '<div class="loader"></div>'
-  window.chrome.storage.local.get({
+var kickoff = async function (force) {
+  var body = await pollFor(() => document.body)
+  body.innerHTML = '<div class="loader"></div>'
+  var items = await storage.get({
     auth: false,
     cache: false
-  }, function (items) {
-    if (!items.auth) {
-      authError()
-    } else {
-      (function () {
-        if (!force && items.cache && age(items.cache.time) < 5) {
-          dataTime = items.cache.time
-          return new Promise(function (r) {
-            console.log('using cache')
-            r(items.cache.data)
-          })
-        }
-        return Promise
-          .all(config.cses.map(function (cse) {
-            return getCseQueue(cse, items.auth)
-          }))
-          .then(function (data) {
-            console.log('fresh data')
-            dataTime = now()
-            window.chrome.storage.local.set({
-              cache: {
-                time: now(),
-                data: data
-              }
-            })
-            return data
-          })
-      })()
-        .then(function (cses) {
-          cses.unshift({})
-          return Object.assign.apply(Object, cses)
-        })
-        .then(parseSections)
-        .then(mapBySection)
-        .then(function (sections) {
-          return buildUI(sections, config.cses.map(function (c) { return c.name }))
-        })
-        .then(function (html) {
-          var refreshWrapper = document.createElement('div')
-          refreshWrapper.innerHTML = 'Last updated ' + age(dataTime) + ' minutes ago. <a href="#"> Refresh? </a>'
-          refreshWrapper.querySelector('a').addEventListener('click', function (e) {
-            e.preventDefault()
-            run(true)
-          })
-
-          document.body.innerHTML = ''
-          document.body.appendChild(refreshWrapper)
-          document.body.insertAdjacentHTML('beforeend', html)
-        })
-    }
   })
+
+  if (!items.auth) {
+    authError()
+  } else {
+    var cses
+    var dataTime
+
+    if (!force && items.cache && age(items.cache.time) < 5) {
+      dataTime = items.cache.time
+      cses = items.cache.data
+    } else {
+      cses = await Promise.all(config.cses.map(cse => getCseQueue(cse, items.auth)))
+      dataTime = now()
+      storage.set({
+        cache: {
+          time: now(),
+          data: cses
+        }
+      })
+    }
+
+    cses.unshift({})
+    cses = Object.assign.apply(Object, cses)
+    cses = parseSections(cses)
+    var sections = mapBySection(cses)
+
+    var html = buildUI(sections, config.cses.map((c) => c.name))
+
+    var refreshWrapper = document.createElement('div')
+    refreshWrapper.innerHTML = 'Last updated ' + age(dataTime) + ' minutes ago. <a href="#"> Refresh? </a>'
+    refreshWrapper.querySelector('a').addEventListener('click', function (e) {
+      e.preventDefault()
+      run(true)
+    })
+
+    body.innerHTML = ''
+    body.appendChild(refreshWrapper)
+    body.insertAdjacentHTML('beforeend', html)
+  }
 }
 
 function authError () {
@@ -81,12 +71,4 @@ function authError () {
   document.body.appendChild(el)
 }
 
-var poll = function poll () {
-  if (document.body) {
-    run(false)
-  } else {
-    window.setTimeout(poll, 100)
-  }
-}
-
-poll()
+kickoff(false)
