@@ -1,6 +1,6 @@
 {
   "name": "cse-finder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Consolidates Pod Bucci CSE queues into one view",
   "main": "src/popup.js",
   "scripts": {

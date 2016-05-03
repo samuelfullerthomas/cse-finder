@@ -3,7 +3,7 @@
 
   "name": "CSE Finder",
   "description": "Consolidates Pod Bucci CSE queues into one view",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icons": {
     "16": "bucci16.png",
     "48": "bucci48.png",
