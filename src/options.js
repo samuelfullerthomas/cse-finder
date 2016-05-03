@@ -1,11 +1,10 @@
 import { save } from './lib/util'
 
-document.querySelector('.save').addEventListener('click', function (e) {
+document.querySelector('.save').addEventListener('click', async function saveCode (e) {
   e.preventDefault()
   const auth = document.querySelector('.auth').value
   if (auth) {
-    save({ auth }, () => {
-      document.body.innerHTML = 'Saved!'
-    })
+    await save({ auth })
+    document.body.innerHTML = 'Saved!'
   }
 })
