@@ -9,8 +9,14 @@ module.exports = {
   },
   module: {
     loaders: [
-      { test: /\.css$/, loader: 'style!css' },
+      { test: /\.css$/, loader: 'style!css!postcss' },
       { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' }
+    ]
+  },
+  postcss: function (webpack) {
+    return [
+      require('postcss-import')({ addDependencyTo: webpack }),
+      require('postcss-cssnext')()
     ]
   }
 }
