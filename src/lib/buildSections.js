@@ -66,7 +66,7 @@ function enrichSections (sections, cses) {
   // Get Date sections
   while (output.length < minDays || !foundFree) {
     currentDate = getNextDay(currentDate)
-    const targetSection = sections[dateToKey(currentDate)]
+    const targetSection = sections[dateToKey(currentDate)] || {}
     const newSection = {
       title: capitalise(dateToTitle(currentDate)),
       cses: cses.map(cse => {

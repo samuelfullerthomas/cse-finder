@@ -8646,7 +8646,7 @@
 
 	  var _loop = function _loop() {
 	    currentDate = getNextDay(currentDate);
-	    var targetSection = sections[dateToKey(currentDate)];
+	    var targetSection = sections[dateToKey(currentDate)] || {};
 	    var newSection = {
 	      title: (0, _util.capitalise)(dateToTitle(currentDate)),
 	      cses: cses.map(function (cse) {
