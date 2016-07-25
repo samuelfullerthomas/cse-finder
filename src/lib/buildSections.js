@@ -101,6 +101,11 @@ function enrichSections (sections, cses) {
     })
   }
 
+  output.unshift({
+    title: 'New',
+    cses: cses.map(cse => sections.newtasks[cse] || emptyBlock)
+  })
+
   return output
 }
 

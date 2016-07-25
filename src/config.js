@@ -8,5 +8,6 @@ export const cses = [
   { name: 'Tommy', id: '41755044194088' },
   { name: 'Jimmy', id: '76629447954998' },
   { name: 'Stefi', id: '45131341129610' },
-  { name: 'David', id: '19208422049726' }
+  { name: 'David', id: '19208422049726' },
+  { name: 'Alain', id: '145454860893785' }
 ]
