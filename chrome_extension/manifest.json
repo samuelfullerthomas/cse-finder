@@ -1,24 +1,20 @@
 {
   "manifest_version": 2,
-
   "name": "CSE Finder",
-  "description": "Consolidates Pod Bucci CSE queues into one view",
+  "description": "Consolidates US CE queues into one view",
   "version": "1.2.0",
   "icons": {
-    "16": "bucci16.png",
-    "48": "bucci48.png",
-    "128": "bucci128.png"
+    "16": "texas16.png",
+    "48": "texas48.png",
+    "128": "texas128.png"
   },
-
   "options_ui": {
     "page": "options.html",
     "chrome_style": true
   },
-
   "browser_action": {
     "default_popup": "popup.html"
   },
-
   "permissions": [
     "storage"
   ]
